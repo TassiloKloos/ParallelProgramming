@@ -7,7 +7,7 @@ import "testing"
 
 //Testfall, ob ReadPicture richtig funktioniert
 func TestReadPicture(t *testing.T) {
-	pic, _ := readPicture("schwarz_klein")
+	pic := readPicture("schwarz_weiss")
 	if pic == nil {
 		t.Error("Fehler beim Einlesen des Bildes")
 	}
@@ -15,17 +15,32 @@ func TestReadPicture(t *testing.T) {
 
 //Testfall, ob ReadPicture bei falsche Bild richtig funktioniert
 func TestReadPictureFalse(t *testing.T) {
-	pic, _ := readPicture("false")
+	pic := readPicture("false")
 	if pic != nil {
 		t.Error("Fehler beim Einlesen eines nicht vorhandenen Bildes")
 	}
 }
 
-func TestAnalyzePicture(t *testing.T) {
-	result := analyzePicture(readPicture("schwarz_klein"))
-	if result != true {
-		t.Error("Fehler beim Analysieren des Bildes")
+func TestTransformWithoutFilter(t *testing.T) {
+	if !transformWithoutFilter("schwarz_weiss") {
+		t.Error("Fehler beim Transformieren des Bildes ohne Filter")
 	}
+}
+
+func TestAnalyzePictureNormal(t *testing.T) {
+	if !analyzePicture("schwarz_weiss", "normal") {
+		t.Error("Fehler beim Analysieren des Bildes ohne Filter")
+	}
+}
+
+func TestAnalyzePictureFloydSteinberg(t *testing.T) {
+	if !analyzePicture("schwarz_weiss", "FloydSteinberg") {
+		t.Error("Fehler beim Analysieren des Bildes mit FloydSteinberg")
+	}
+}
+
+func TestTransformPicture(t *testing.T) {
+	transformPicture("schwarz_weiss")
 }
 
 func TestMain(t *testing.T) {
