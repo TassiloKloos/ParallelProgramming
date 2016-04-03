@@ -21,6 +21,18 @@ func TestReadPictureFalse(t *testing.T) {
 	}
 }
 
+func TestCheckValueOfPixel255(t *testing.T) {
+	if checkValueOfPixel(255, 20) > 255 {
+		t.Error("Fehler beim Berechnen des Pixelwertes über 255")
+	}
+}
+
+func TestCheckValueOfPixel0(t *testing.T) {
+	if checkValueOfPixel(0, -20) < 0 {
+		t.Error("Fehler beim Berechnen des Pixelwertes unter 0")
+	}
+}
+
 func TestTransformWithoutFilter(t *testing.T) {
 	if !transformWithoutFilter("schwarz_weiss") {
 		t.Error("Fehler beim Transformieren des Bildes ohne Filter")
