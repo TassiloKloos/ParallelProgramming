@@ -83,6 +83,7 @@ func transformWithFloydSteinberg(input string) bool {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			var difference float32
 			r, g, b, _ := pic.At(x, y).RGBA()
+			//			fmt.Println("Wert: ", r/256)
 
 			//			//zu Testzwecken, Ausgabe der Differenzen-Matrix
 			//			for by := bounds.Min.Y; by < bounds.Max.Y; by++ {
@@ -102,27 +103,29 @@ func transformWithFloydSteinberg(input string) bool {
 				m.Set(x, y, color.RGBA{255, 255, 255, 255})
 				//verbleibende Differenz wird berechnet
 				difference = float32(-(255 - float32(value)))
+				//				fmt.Println("Differenz: ", difference)
 			} else {
 				m.Set(x, y, color.RGBA{0, 0, 0, 255})
 				//verbleibende Differenz wird berechnet
 				difference = float32(value)
+				//				fmt.Println("Differenz: ", difference)
 			}
 			if x < bounds.Max.X-1 {
 				// x+1, y = 7/16
-				differenceOfPixel[y][x+1] = difference * 7 / 16
+				differenceOfPixel[y][x+1] = differenceOfPixel[y][x+1] + difference*7/16
 			}
 			if y < bounds.Max.Y-1 {
 				if x < bounds.Max.X-1 {
 					// x+1, y+1 = 1/16
-					differenceOfPixel[y+1][x+1] = difference * 1 / 16
+					differenceOfPixel[y+1][x+1] = differenceOfPixel[y+1][x+1] + difference*1/16
 				}
 			}
 			if x > 0 {
 				// x-1, y+1 = 3/16
-				differenceOfPixel[y+1][x-1] = difference * 3 / 16
+				differenceOfPixel[y+1][x-1] = differenceOfPixel[y+1][x-1] + difference*3/16
 			}
 			// x, y+1 = 5/16
-			differenceOfPixel[y+1][x] = difference * 5 / 16
+			differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference*5/16
 		}
 	}
 	png.Encode(newPic, m)
@@ -163,6 +166,7 @@ func testPicture() {
 	transformPicture("newyork")
 	transformPicture("middleage")
 	transformPicture("schwarz_weiss")
+	transformPicture("grau_vier")
 }
 
 func main() {
