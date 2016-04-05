@@ -5,59 +5,30 @@ package main
 
 import "testing"
 
-//Testfall, ob ReadPicture richtig funktioniert
-func TestReadPicture(t *testing.T) {
-	pic := readPicture("schwarz_weiss.png")
-	if pic == nil {
-		t.Error("Fehler beim Einlesen des Bildes")
-	}
-}
-
-//Testfall, ob ReadPicture bei falsche Bild richtig funktioniert
-func TestReadPictureFalse(t *testing.T) {
-	pic := readPicture("false.png")
-	if pic != nil {
-		t.Error("Fehler beim Einlesen eines nicht vorhandenen Bildes")
-	}
-}
-
-func TestCheckValueOfPixel255(t *testing.T) {
-	if checkValueOfPixel(255, 20) > 255 {
-		t.Error("Fehler beim Berechnen des Pixelwertes über 255")
-	}
-}
-
-func TestCheckValueOfPixel0(t *testing.T) {
-	if checkValueOfPixel(0, -20) < 0 {
-		t.Error("Fehler beim Berechnen des Pixelwertes unter 0")
-	}
-}
-
-//hier jeweils auch jpg testen
 func TestTransformWithoutFilterPNG(t *testing.T) {
-	pic = readPicture("schwarz_weiss.png")
-	if !transformWithoutFilter("schwarz_weiss.png") {
+	tr := transformSeq{readPicture("schwarz_weiss.png")}
+	if !tr.transformWithoutFilter("schwarz_weiss.png") {
 		t.Error("Fehler beim Transformieren des PNG-Bildes mit Schwellwert")
 	}
 }
 
 func TestTransformWithoutFilterJPG(t *testing.T) {
-	pic = readPicture("schwarz_weiss.jpg")
-	if !transformWithoutFilter("schwarz_weiss.jpg") {
+	tr := transformSeq{readPicture("schwarz_weiss.png")}
+	if !tr.transformWithoutFilter("schwarz_weiss.jpg") {
 		t.Error("Fehler beim Transformieren des JPG-Bildes mit Schwellwert")
 	}
 }
 
 func TestTransformWithFloydSteinbergPNG(t *testing.T) {
-	pic = readPicture("schwarz_weiss.png")
-	if !transformWithFloydSteinberg("schwarz_weiss.png") {
+	tr := transformSeq{readPicture("schwarz_weiss.png")}
+	if !tr.transformWithFloydSteinberg("schwarz_weiss.png") {
 		t.Error("Fehler beim Transformieren des PNG-Bildes ohne Filter")
 	}
 }
 
 func TestTransformWithFloydSteinbergJPG(t *testing.T) {
-	pic = readPicture("schwarz_weiss.jpg")
-	if !transformWithFloydSteinberg("schwarz_weiss.jpg") {
+	tr := transformSeq{readPicture("schwarz_weiss.png")}
+	if !tr.transformWithFloydSteinberg("schwarz_weiss.jpg") {
 		t.Error("Fehler beim Transformieren des JPG-Bildes ohne Filter")
 	}
 }
@@ -108,12 +79,4 @@ func TestAnalyzePictureAlgorithm3JPG(t *testing.T) {
 	if !analyzePicture("schwarz_weiss.jpg", "Algorithm3") {
 		t.Error("Fehler beim Analysieren des JPG-Bildes mit Algorithmus 3")
 	}
-}
-
-func TestTransformPicture(t *testing.T) {
-	transformPicture("schwarz_weiss.png")
-}
-
-func TestMain(t *testing.T) {
-	main()
 }
