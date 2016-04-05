@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/jpeg"
 	"image/png"
 	_ "image/png"
 	"os"
@@ -67,7 +68,7 @@ func transformWithoutFilter(input string) bool {
 	if format == ".png" {
 		png.Encode(newPic, m)
 	} else {
-		//TODO Speichern als JPG
+		jpeg.Encode(newPic, m, nil)
 	}
 	return true
 }
@@ -82,24 +83,14 @@ func transformWithFloydSteinberg(input string) bool {
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// Array, welches Differenzen der umliegenden Pixel speichert
-	differenceOfPixel := make([][]float32, bounds.Max.Y+1)
+	differenceOfPixel := make([][]float32, bounds.Max.Y)
 	for element := range differenceOfPixel {
-		differenceOfPixel[element] = make([]float32, bounds.Max.X+1)
+		differenceOfPixel[element] = make([]float32, bounds.Max.X)
 	}
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			var difference float32
 			r, g, b, _ := pic.At(x, y).RGBA()
-
-			//			//zu Testzwecken, Ausgabe der Differenzen-Matrix
-			//			for by := bounds.Min.Y; by < bounds.Max.Y; by++ {
-			//				for bx := bounds.Min.X; bx < bounds.Max.X; bx++ {
-			//					fmt.Printf("[%v] ", int32(differenceOfPixel[by][bx]))
-			//				}
-			//				fmt.Println("")
-			//			}
-			//			fmt.Println("")
-
 			r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
 			g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
 			b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
@@ -123,19 +114,19 @@ func transformWithFloydSteinberg(input string) bool {
 					// x+1, y+1 = 1/16
 					differenceOfPixel[y+1][x+1] = differenceOfPixel[y+1][x+1] + difference*1/16
 				}
+				if x > 0 {
+					// x-1, y+1 = 3/16
+					differenceOfPixel[y+1][x-1] = differenceOfPixel[y+1][x-1] + difference*3/16
+				}
+				// x, y+1 = 5/16
+				differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference*5/16
 			}
-			if x > 0 {
-				// x-1, y+1 = 3/16
-				differenceOfPixel[y+1][x-1] = differenceOfPixel[y+1][x-1] + difference*3/16
-			}
-			// x, y+1 = 5/16
-			differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference*5/16
 		}
 	}
 	if format == ".png" {
 		png.Encode(newPic, m)
 	} else {
-		//TODO Speichern als JPG
+		jpeg.Encode(newPic, m, nil)
 	}
 	return true
 }
@@ -150,9 +141,9 @@ func transformWithAlgorithm2(input string) bool {
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// Array, welches Differenzen der umliegenden Pixel speichert
-	differenceOfPixel := make([][]float32, bounds.Max.Y+1)
+	differenceOfPixel := make([][]float32, bounds.Max.Y)
 	for element := range differenceOfPixel {
-		differenceOfPixel[element] = make([]float32, bounds.Max.X+1)
+		differenceOfPixel[element] = make([]float32, bounds.Max.X)
 	}
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
@@ -176,26 +167,32 @@ func transformWithAlgorithm2(input string) bool {
 				// x+1, y = 4/12 = 1/3
 				differenceOfPixel[y][x+1] = differenceOfPixel[y][x+1] + difference/3
 			}
+			if x < bounds.Max.X-2 {
+				//x+2, y = 1/12
+				differenceOfPixel[y][x+2] = differenceOfPixel[y][x+2] + difference/12
+			}
 			if y < bounds.Max.Y-1 {
 				if x < bounds.Max.X-1 {
 					// x+1, y+1 = 1/12
 					differenceOfPixel[y+1][x+1] = differenceOfPixel[y+1][x+1] + difference/12
 				}
+				if x > 0 {
+					// x-1, y+1 = 1/12
+					differenceOfPixel[y+1][x-1] = differenceOfPixel[y+1][x-1] + difference/12
+				}
+				// x, y+1 = 4/12 = 1/3
+				differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference/3
 			}
-			if x > 0 {
-				// x-1, y+1 = 1/12
-				differenceOfPixel[y+1][x-1] = differenceOfPixel[y+1][x-1] + difference/12
+			if y < bounds.Max.Y-2 {
+				// x, y+2 = 1/12
+				differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference/12
 			}
-			// x, y+1 = 4/12 = 1/3
-			differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference/3
 		}
-		//TODO 	x+2, y = 1/12
-		//		x, y+2 = 1/12
 	}
 	if format == ".png" {
 		png.Encode(newPic, m)
 	} else {
-		//TODO Speichern als JPG
+		jpeg.Encode(newPic, m, nil)
 	}
 	return true
 }
@@ -210,9 +207,9 @@ func transformWithAlgorithm3(input string) bool {
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// Array, welches Differenzen der umliegenden Pixel speichert
-	differenceOfPixel := make([][]float32, bounds.Max.Y+1)
+	differenceOfPixel := make([][]float32, bounds.Max.Y)
 	for element := range differenceOfPixel {
-		differenceOfPixel[element] = make([]float32, bounds.Max.X+1)
+		differenceOfPixel[element] = make([]float32, bounds.Max.X)
 	}
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
@@ -236,32 +233,56 @@ func transformWithAlgorithm3(input string) bool {
 				// x+1, y = 8/42 = 4/21
 				differenceOfPixel[y][x+1] = differenceOfPixel[y][x+1] + difference*4/21
 			}
+			if x < bounds.Max.X-2 {
+				// x+2, y   = 4/42 = 2/21
+				differenceOfPixel[y][x+2] = differenceOfPixel[y][x+2] + difference*2/21
+			}
 			if y < bounds.Max.Y-1 {
 				if x < bounds.Max.X-1 {
 					// x+1, y+1 = 4/42 = 2/21
 					differenceOfPixel[y+1][x+1] = differenceOfPixel[y+1][x+1] + difference*2/21
 				}
+				if x < bounds.Max.X-2 {
+					// x+2, y+1   = 2/42 = 1/21
+					differenceOfPixel[y+1][x+2] = differenceOfPixel[y+1][x+2] + difference*1/21
+				}
+				if x > 0 {
+					// x-1, y+1 = 4/42 = 2/21
+					differenceOfPixel[y+1][x-1] = differenceOfPixel[y+1][x-1] + difference*2/21
+				}
+				if x > 1 {
+					// x-2, y+1 = 2/42 = 1/21
+					differenceOfPixel[y+1][x-2] = differenceOfPixel[y+1][x-2] + difference*1/21
+				}
+				// x, y+1 = 8/42 = 4/21
+				differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference*4/21
 			}
-			if x > 0 {
-				// x-1, y+1 = 4/42 = 2/21
-				differenceOfPixel[y+1][x-1] = differenceOfPixel[y+1][x-1] + difference*2/21
+			if y < bounds.Max.Y-2 {
+				if x < bounds.Max.X-1 {
+					// x+1, y+2 = 2/42 = 1/21
+					differenceOfPixel[y+2][x+1] = differenceOfPixel[y+2][x+1] + difference*1/21
+				}
+				if x < bounds.Max.X-2 {
+					// x+2, y+2   = 1/42
+					differenceOfPixel[y+2][x+2] = differenceOfPixel[y+2][x+2] + difference*1/42
+				}
+				if x > 0 {
+					// x-1, y+2 = 2/42 = 1/21
+					differenceOfPixel[y+2][x-1] = differenceOfPixel[y+2][x-1] + difference*1/21
+				}
+				if x > 1 {
+					// x-2, y+2 = 1/42
+					differenceOfPixel[y+2][x-2] = differenceOfPixel[y+2][x-2] + difference*1/42
+				}
+				// x, y+2 = 4/42 = 2/21
+				differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference*2/21
 			}
-			// x, y+1 = 8/42 = 4/21
-			differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference*4/21
 		}
-		//TODO	x+2, y   = 4/42
-		//		x-2, y+1 = 2/42
-		//		x+2, y+1 = 2/42
-		//		x-2, y+2 = 1/42
-		//		x-1, y+2 = 2/42
-		//		x  , y+2 = 4/42
-		//		x+1, y+2 = 2/42
-		//		x+2, y+2 = 1/42
 	}
 	if format == ".png" {
 		png.Encode(newPic, m)
 	} else {
-		//TODO Speichern als JPG
+		jpeg.Encode(newPic, m, nil)
 	}
 	return true
 }
@@ -300,12 +321,13 @@ func transformPicture(input string) {
 }
 
 func main() {
-	transformPicture("landscape.png")
 	transformPicture("bunte_smarties.png")
+	transformPicture("dhbw.jpg")
 	transformPicture("flower.png")
-	transformPicture("newyork.png")
+	transformPicture("landscape.png")
 	transformPicture("middleage.png")
+	transformPicture("newyork.png")
 	transformPicture("schwarz_weiss.png")
+	transformPicture("schwarz_weiss.jpg")
 	transformPicture("grau_vier.png")
-	//	transformPicture("dhbw.jpg")
 }

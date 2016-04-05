@@ -34,41 +34,79 @@ func TestCheckValueOfPixel0(t *testing.T) {
 }
 
 //hier jeweils auch jpg testen
-func TestTransformWithoutFilter(t *testing.T) {
+func TestTransformWithoutFilterPNG(t *testing.T) {
 	pic = readPicture("schwarz_weiss.png")
-	if !transformWithoutFilter("schwarz_weiss") {
-		t.Error("Fehler beim Transformieren des Bildes mit Schwellwert")
+	if !transformWithoutFilter("schwarz_weiss.png") {
+		t.Error("Fehler beim Transformieren des PNG-Bildes mit Schwellwert")
 	}
 }
 
-func TestTtansformWithFloydSteinberg(t *testing.T) {
-	pic = readPicture("schwarz_weiss.png")
-	if !transformWithFloydSteinberg("schwarz_weiss") {
-		t.Error("Fehler beim Transformieren des Bildes ohne Filter")
+func TestTransformWithoutFilterJPG(t *testing.T) {
+	pic = readPicture("schwarz_weiss.jpg")
+	if !transformWithoutFilter("schwarz_weiss.jpg") {
+		t.Error("Fehler beim Transformieren des JPG-Bildes mit Schwellwert")
 	}
 }
 
-func TestAnalyzePictureNormal(t *testing.T) {
+func TestTransformWithFloydSteinbergPNG(t *testing.T) {
+	pic = readPicture("schwarz_weiss.png")
+	if !transformWithFloydSteinberg("schwarz_weiss.png") {
+		t.Error("Fehler beim Transformieren des PNG-Bildes ohne Filter")
+	}
+}
+
+func TestTransformWithFloydSteinbergJPG(t *testing.T) {
+	pic = readPicture("schwarz_weiss.jpg")
+	if !transformWithFloydSteinberg("schwarz_weiss.jpg") {
+		t.Error("Fehler beim Transformieren des JPG-Bildes ohne Filter")
+	}
+}
+
+func TestAnalyzePictureNormalPNG(t *testing.T) {
 	if !analyzePicture("schwarz_weiss.png", "Schwellwert") {
-		t.Error("Fehler beim Analysieren des Bildes ohne Filter")
+		t.Error("Fehler beim Analysieren des PNG-Bildes ohne Filter")
 	}
 }
 
-func TestAnalyzePictureFloydSteinberg(t *testing.T) {
+func TestAnalyzePictureNormalJPG(t *testing.T) {
+	if !analyzePicture("schwarz_weiss.jpg", "Schwellwert") {
+		t.Error("Fehler beim Analysieren des JPG-Bildes ohne Filter")
+	}
+}
+
+func TestAnalyzePictureFloydSteinbergPNG(t *testing.T) {
 	if !analyzePicture("schwarz_weiss.png", "FloydSteinberg") {
-		t.Error("Fehler beim Analysieren des Bildes mit FloydSteinberg")
+		t.Error("Fehler beim Analysieren des PNG-Bildes mit FloydSteinberg")
 	}
 }
 
-func TestAnalyzePictureAlgorithm2(t *testing.T) {
+func TestAnalyzePictureFloydSteinbergJPG(t *testing.T) {
+	if !analyzePicture("schwarz_weiss.jpg", "FloydSteinberg") {
+		t.Error("Fehler beim Analysieren des JPG-Bildes mit FloydSteinberg")
+	}
+}
+
+func TestAnalyzePictureAlgorithm2PNG(t *testing.T) {
 	if !analyzePicture("schwarz_weiss.png", "Algorithm2") {
-		t.Error("Fehler beim Analysieren des Bildes mit Algorithmus 2")
+		t.Error("Fehler beim Analysieren des PNG-Bildes mit Algorithmus 2")
 	}
 }
 
-func TestAnalyzePictureAlgorithm3(t *testing.T) {
+func TestAnalyzePictureAlgorithm2JPG(t *testing.T) {
+	if !analyzePicture("schwarz_weiss.jpg", "Algorithm2") {
+		t.Error("Fehler beim Analysieren des JPG-Bildes mit Algorithmus 2")
+	}
+}
+
+func TestAnalyzePictureAlgorithm3PNG(t *testing.T) {
 	if !analyzePicture("schwarz_weiss.png", "Algorithm3") {
-		t.Error("Fehler beim Analysieren des Bildes mit Algorithmus 3")
+		t.Error("Fehler beim Analysieren des PNG-Bildes mit Algorithmus 3")
+	}
+}
+
+func TestAnalyzePictureAlgorithm3JPG(t *testing.T) {
+	if !analyzePicture("schwarz_weiss.jpg", "Algorithm3") {
+		t.Error("Fehler beim Analysieren des JPG-Bildes mit Algorithmus 3")
 	}
 }
 
