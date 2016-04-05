@@ -34,7 +34,15 @@ func TestCheckValueOfPixel0(t *testing.T) {
 }
 
 func TestTransformWithoutFilter(t *testing.T) {
+	pic = readPicture("schwarz_weiss")
 	if !transformWithoutFilter("schwarz_weiss") {
+		t.Error("Fehler beim Transformieren des Bildes ohne Filter")
+	}
+}
+
+func TestTtansformWithFloydSteinberg(t *testing.T) {
+	pic = readPicture("schwarz_weiss")
+	if !transformWithFloydSteinberg("schwarz_weiss") {
 		t.Error("Fehler beim Transformieren des Bildes ohne Filter")
 	}
 }
