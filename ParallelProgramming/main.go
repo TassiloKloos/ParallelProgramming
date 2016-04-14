@@ -13,6 +13,7 @@ var newPic *os.File
 
 //Bild wird eingelesen
 func readPicture(input string) image.Image {
+	//Alle Bilder im Ordner pictures gespeichert
 	reader, err := os.Open("pictures/" + input)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -32,8 +33,10 @@ func checkValueOfPixel(value uint32, add float32) uint32 {
 	var result int32
 	result = int32(value) + int32(add)
 	if result > 255 {
+		//falls addierte Pixelanzahl > 255: Setzen des Wertes auf 255
 		result = 255
 	} else if result < 0 {
+		//falls addierte Pixelanzahl < 0: Setzen des Wertes auf 0
 		result = 0
 	}
 	return uint32(result)
@@ -43,6 +46,7 @@ func checkValueOfPixel(value uint32, add float32) uint32 {
 func analyzePicture(input, method string) bool {
 	tBefore := time.Now()
 	result := false
+	//neues Objekt zur sequentiellen Transformation
 	tr := transformSeq{picture}
 	//Aufruf der Transformations-Methode
 	switch method {
@@ -56,6 +60,7 @@ func analyzePicture(input, method string) bool {
 		result = tr.transformWithAlgorithm3(input)
 	}
 	duration := time.Since(tBefore)
+	//Ausgabe der Zeit in Sekunden mit 3 Kommastellen
 	msec := int32(duration.Seconds() * 1000)
 	sec := float32(msec) / 1000
 	fmt.Println("Dauer bei ", method, ": ", sec, " sec")
@@ -77,11 +82,11 @@ func transformPicture(input string) {
 func main() {
 	//alle Bilder werden transformiert
 	transformPicture("bunte_smarties.png")
-	transformPicture("dhbw.jpg")
+	//	transformPicture("dhbw.jpg")
 	transformPicture("flower.png")
 	transformPicture("landscape.png")
-	transformPicture("middleage.png")
-	transformPicture("newyork.png")
+	//	transformPicture("middleage.png")
+	//	transformPicture("newyork.png")
 	transformPicture("schwarz_weiss.png")
 	transformPicture("schwarz_weiss.jpg")
 	transformPicture("grau_vier.png")
