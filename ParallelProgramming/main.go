@@ -42,28 +42,42 @@ func checkValueOfPixel(value uint32, add float32) uint32 {
 	return uint32(result)
 }
 
-//Funktion, die Zeit zur Ausführung der Transformation misst
-func analyzePicture(input, method string) bool {
+//Funktion, die Zeit zur Ausführung der sequentiellen Transformation misst
+func analyzePictureSeq(input, method string) bool {
 	tBefore := time.Now()
 	result := false
 	//neues Objekt zur sequentiellen Transformation
-	tr := transformSeq{picture}
+	trSeq := transformSeq{picture}
 	//Aufruf der Transformations-Methode
 	switch method {
-	case "Schwellwert":
-		result = tr.transformWithoutFilter(input)
 	case "FloydSteinberg":
-		result = tr.transformWithFloydSteinberg(input)
+		result = trSeq.transformWithFloydSteinberg(input)
 	case "Algorithm2":
-		result = tr.transformWithAlgorithm2(input)
+		result = trSeq.transformWithAlgorithm2(input)
 	case "Algorithm3":
-		result = tr.transformWithAlgorithm3(input)
+		result = trSeq.transformWithAlgorithm3(input)
 	}
 	duration := time.Since(tBefore)
 	//Ausgabe der Zeit in Sekunden mit 3 Kommastellen
 	msec := int32(duration.Seconds() * 1000)
 	sec := float32(msec) / 1000
-	fmt.Println("Dauer bei ", method, ": ", sec, " sec")
+	fmt.Println("Dauer bei ", method, " sequentiell: ", sec, " sec")
+	return result
+}
+
+//Funktion, die Zeit zur Ausführung der parallelen Transformation misst
+func analyzePicturePar(input, method string) bool {
+	tBefore := time.Now()
+	result := false
+	//neues Objekt zur sequentiellen Transformation
+	trPar := transformPar{picture}
+	//Aufruf der Transformations-Methode
+	result = trPar.transformParallel(input, method)
+	duration := time.Since(tBefore)
+	//Ausgabe der Zeit in Sekunden mit 3 Kommastellen
+	msec := int32(duration.Seconds() * 1000)
+	sec := float32(msec) / 1000
+	fmt.Println("Dauer bei ", method, " parallel: ", sec, " sec")
 	return result
 }
 
@@ -72,21 +86,23 @@ func transformPicture(input string) {
 	fmt.Println("Bild: ", input)
 	picture = readPicture(input)
 	//alle Algorithmen werden verwendet
-	analyzePicture(input, "Schwellwert")
-	analyzePicture(input, "FloydSteinberg")
-	analyzePicture(input, "Algorithm2")
-	analyzePicture(input, "Algorithm3")
+	analyzePictureSeq(input, "FloydSteinberg")
+	analyzePicturePar(input, "FloydSteinberg")
+	analyzePictureSeq(input, "Algorithm2")
+	analyzePicturePar(input, "Algorithm2")
+	analyzePictureSeq(input, "Algorithm3")
+	analyzePicturePar(input, "Algorithm3")
 	fmt.Println("")
 }
 
 func main() {
 	//alle Bilder werden transformiert
 	transformPicture("bunte_smarties.png")
-	//	transformPicture("dhbw.jpg")
+	transformPicture("dhbw.jpg")
 	transformPicture("flower.png")
 	transformPicture("landscape.png")
-	//	transformPicture("middleage.png")
-	//	transformPicture("newyork.png")
+	transformPicture("middleage.png")
+	transformPicture("newyork.png")
 	transformPicture("schwarz_weiss.png")
 	transformPicture("schwarz_weiss.jpg")
 	transformPicture("grau_vier.png")

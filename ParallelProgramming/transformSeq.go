@@ -14,40 +14,6 @@ type transformSeq struct {
 	pic image.Image
 }
 
-//Funktion, die Bild ohne Filter transformiert
-func (t transformSeq) transformWithoutFilter(input string) bool {
-	bounds := t.pic.Bounds()
-	//Aufteilen des Inputs in Name und Dateiformat
-	i := strings.Index(input, ".")
-	name := input[:i]
-	format := input[i:]
-	//Erstellen des neuen Bildes mit entsprechendem Namen und Dateiformat
-	newPic, _ = os.Create("pictures/" + name + "_schwellwert" + format)
-	defer newPic.Close()
-	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
-	//zwei for-Schleifen, um jeden Pixelwert auszulesen
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			// Maximalwert: 65535, (bzw. 3 * 65535 = 196605)
-			r, g, b, _ := t.pic.At(x, y).RGBA()
-			// --> neues Maximum: 256
-			wert := (r + g + b) / 256 / 3
-			//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
-			if wert >= 128 {
-				m.Set(x, y, color.RGBA{255, 255, 255, 255})
-			} else {
-				m.Set(x, y, color.RGBA{0, 0, 0, 255})
-			}
-		}
-	}
-	if format == ".png" {
-		png.Encode(newPic, m)
-	} else {
-		jpeg.Encode(newPic, m, nil)
-	}
-	return true
-}
-
 //Funktion, die Bild nach Filter von Floyd / Steinberg transformiert
 func (t transformSeq) transformWithFloydSteinberg(input string) bool {
 	bounds := t.pic.Bounds()
@@ -56,7 +22,7 @@ func (t transformSeq) transformWithFloydSteinberg(input string) bool {
 	name := input[:i]
 	format := input[i:]
 	//Erstellen des neuen Bildes mit entsprechendem Namen und Dateiformat
-	newPic, _ = os.Create("pictures/" + name + "_floydsteinberg" + format)
+	newPic, _ = os.Create("pictures/" + name + "_floydsteinberg_seq" + format)
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// 2-dimensionales Array, welches Differenzen der umliegenden Pixel speichert
@@ -120,7 +86,7 @@ func (t transformSeq) transformWithAlgorithm2(input string) bool {
 	name := input[:i]
 	format := input[i:]
 	//Erstellen des neuen Bildes mit entsprechendem Namen und Dateiformat
-	newPic, _ = os.Create("pictures/" + name + "_algorithm2" + format)
+	newPic, _ = os.Create("pictures/" + name + "_algorithm2_seq" + format)
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// 2-dimensionales Array, welches Differenzen der umliegenden Pixel speichert
@@ -192,7 +158,7 @@ func (t transformSeq) transformWithAlgorithm3(input string) bool {
 	name := input[:i]
 	format := input[i:]
 	//Erstellen des neuen Bildes mit entsprechendem Namen und Dateiformat
-	newPic, _ = os.Create("pictures/" + name + "_algorithm3" + format)
+	newPic, _ = os.Create("pictures/" + name + "_algorithm3_seq" + format)
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// 2-dimensionales Array, welches Differenzen der umliegenden Pixel speichert
