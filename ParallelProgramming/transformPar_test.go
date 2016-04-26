@@ -19,6 +19,18 @@ func TestTransformWithFloydSteinbergJPGPar(t *testing.T) {
 	}
 }
 
+func TestAnalyzePictureSchwellwertPNGPar(t *testing.T) {
+	if !analyzePicturePar("schwarz_weiss.png", "Schwellwert") {
+		t.Error("Fehler beim parallelen Analysieren des PNG-Bildes mit Schwellwert-Verfahren")
+	}
+}
+
+func TestAnalyzePictureSchwellwertJPGPar(t *testing.T) {
+	if !analyzePicturePar("schwarz_weiss.jpg", "Schwellwert") {
+		t.Error("Fehler beim parallelen Analysieren des JPG-Bildes mit Schwellwert-Verfahren")
+	}
+}
+
 func TestAnalyzePictureFloydSteinbergPNGPar(t *testing.T) {
 	if !analyzePicturePar("schwarz_weiss.png", "FloydSteinberg") {
 		t.Error("Fehler beim parallelen Analysieren des PNG-Bildes mit FloydSteinberg")
@@ -52,5 +64,17 @@ func TestAnalyzePictureAlgorithm3PNGPar(t *testing.T) {
 func TestAnalyzePictureAlgorithm3JPGPar(t *testing.T) {
 	if !analyzePicturePar("schwarz_weiss.jpg", "Algorithm3") {
 		t.Error("Fehler beim parallelen Analysieren des JPG-Bildes mit Algorithmus 3")
+	}
+}
+
+func TestAnalyzePictureGraustufenPNGPar(t *testing.T) {
+	if !analyzePicturePar("schwarz_weiss.png", "Graustufen") {
+		t.Error("Fehler beim parallelen Analysieren des PNG-Bildes mit Graustufen")
+	}
+}
+
+func TestAnalyzePictureGraustufenJPGPar(t *testing.T) {
+	if !analyzePicturePar("schwarz_weiss.jpg", "Graustufen") {
+		t.Error("Fehler beim parallelen Analysieren des JPG-Bildes mit Graustufen")
 	}
 }

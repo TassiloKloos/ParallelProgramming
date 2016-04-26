@@ -22,7 +22,7 @@ func (t transformPar) transformParallel(input, method string) bool {
 	name := input[:i]
 	format := input[i:]
 	//Erstellen des neuen Bildes mit entsprechendem Namen und Dateiformat
-	newPic, _ = os.Create("pictures/" + name + "_floydsteinberg_par" + format)
+	newPic, _ = os.Create("pictures/" + name + "_" + method + "_par" + format)
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// 2-dimensionales Array, welches Differenzen der umliegenden Pixel speichert
@@ -34,12 +34,16 @@ func (t transformPar) transformParallel(input, method string) bool {
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		//hier Go-Routinen starten, für jede Zeile eigene Go-Routine
 		switch method {
+		case "Schwellwert":
+			m = t.transformLineSchwellwert(m, y, bounds, differenceOfPixel)
 		case "FloydSteinberg":
 			m = t.transformLineFloydSteinberg(m, y, bounds, differenceOfPixel)
 		case "Algorithm2":
 			m = t.transformLineAlgorithm2(m, y, bounds, differenceOfPixel)
 		case "Algorithm3":
 			m = t.transformLineAlgorithm3(m, y, bounds, differenceOfPixel)
+		case "Graustufen":
+			m = t.transformLineGraustufen(m, y, bounds, differenceOfPixel)
 		}
 	}
 	if format == ".png" {
@@ -48,6 +52,26 @@ func (t transformPar) transformParallel(input, method string) bool {
 		jpeg.Encode(newPic, m, nil)
 	}
 	return true
+}
+
+//Funktion, die jeweils eine Zeile mit Schwellwert transformiert
+func (t transformPar) transformLineSchwellwert(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
+	for x := bounds.Min.X; x < bounds.Max.X; x++ {
+		r, g, b, _ := t.pic.At(x, y).RGBA()
+		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
+		r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
+		g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
+		b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
+		// Maximalwert: jeweils 256
+		value := (r + g + b) / 3
+		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
+		if value >= 128 {
+			m.Set(x, y, color.RGBA{255, 255, 255, 255})
+		} else {
+			m.Set(x, y, color.RGBA{0, 0, 0, 255})
+		}
+	}
+	return m
 }
 
 //Funktion, die jeweils eine Zeile mit Floyd-Steinberg-Algorithmus transformiert
@@ -212,6 +236,22 @@ func (t transformPar) transformLineAlgorithm3(m *image.RGBA, y int, bounds image
 			// x, y+2 = 4/42 = 2/21
 			differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference*2/21
 		}
+	}
+	return m
+}
+
+//Funktion, die jeweils eine Zeile mit Graustufen transformiert
+func (t transformPar) transformLineGraustufen(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
+	for x := bounds.Min.X; x < bounds.Max.X; x++ {
+		r, g, b, _ := t.pic.At(x, y).RGBA()
+		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
+		r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
+		g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
+		b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
+		// Maximalwert: jeweils 256
+		value := uint8((r + g + b) / 3)
+		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
+		m.Set(x, y, color.RGBA{value, value, value, 255})
 	}
 	return m
 }

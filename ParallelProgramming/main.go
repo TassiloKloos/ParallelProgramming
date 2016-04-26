@@ -49,19 +49,12 @@ func analyzePictureSeq(input, method string) bool {
 	//neues Objekt zur sequentiellen Transformation
 	trSeq := transformSeq{picture}
 	//Aufruf der Transformations-Methode
-	switch method {
-	case "FloydSteinberg":
-		result = trSeq.transformWithFloydSteinberg(input)
-	case "Algorithm2":
-		result = trSeq.transformWithAlgorithm2(input)
-	case "Algorithm3":
-		result = trSeq.transformWithAlgorithm3(input)
-	}
+	result = trSeq.transformSequentiell(input, method)
 	duration := time.Since(tBefore)
 	//Ausgabe der Zeit in Sekunden mit 3 Kommastellen
 	msec := int32(duration.Seconds() * 1000)
 	sec := float32(msec) / 1000
-	fmt.Println("Dauer bei ", method, " sequentiell: ", sec, " sec")
+	fmt.Println("Dauer bei ", method, " parallel: ", sec, " sec")
 	return result
 }
 
@@ -69,7 +62,7 @@ func analyzePictureSeq(input, method string) bool {
 func analyzePicturePar(input, method string) bool {
 	tBefore := time.Now()
 	result := false
-	//neues Objekt zur sequentiellen Transformation
+	//neues Objekt zur parallelen Transformation
 	trPar := transformPar{picture}
 	//Aufruf der Transformations-Methode
 	result = trPar.transformParallel(input, method)
@@ -86,12 +79,16 @@ func transformPicture(input string) {
 	fmt.Println("Bild: ", input)
 	picture = readPicture(input)
 	//alle Algorithmen werden verwendet
+	analyzePictureSeq(input, "Schwellwert")
+	analyzePicturePar(input, "Schwellwert")
 	analyzePictureSeq(input, "FloydSteinberg")
 	analyzePicturePar(input, "FloydSteinberg")
 	analyzePictureSeq(input, "Algorithm2")
 	analyzePicturePar(input, "Algorithm2")
 	analyzePictureSeq(input, "Algorithm3")
 	analyzePicturePar(input, "Algorithm3")
+	analyzePictureSeq(input, "Graustufen")
+	analyzePicturePar(input, "Graustufen")
 	fmt.Println("")
 }
 
@@ -99,11 +96,7 @@ func main() {
 	//alle Bilder werden transformiert
 	transformPicture("bunte_smarties.png")
 	transformPicture("dhbw.jpg")
-	transformPicture("flower.png")
-	transformPicture("landscape.png")
 	transformPicture("middleage.png")
-	transformPicture("newyork.png")
 	transformPicture("schwarz_weiss.png")
 	transformPicture("schwarz_weiss.jpg")
-	transformPicture("grau_vier.png")
 }
