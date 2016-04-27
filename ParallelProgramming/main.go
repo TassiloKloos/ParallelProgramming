@@ -54,18 +54,18 @@ func analyzePictureSeq(input, method string) bool {
 	//Ausgabe der Zeit in Sekunden mit 3 Kommastellen
 	msec := int32(duration.Seconds() * 1000)
 	sec := float32(msec) / 1000
-	fmt.Println("Dauer bei ", method, " parallel: ", sec, " sec")
+	fmt.Println("Dauer bei ", method, " sequentiell: ", sec, " sec")
 	return result
 }
 
 //Funktion, die Zeit zur Ausführung der parallelen Transformation misst
-func analyzePicturePar(input, method string) bool {
+func analyzePicturePar(input, method string, threads int) bool {
 	tBefore := time.Now()
 	result := false
 	//neues Objekt zur parallelen Transformation
 	trPar := transformPar{picture}
 	//Aufruf der Transformations-Methode
-	result = trPar.transformParallel(input, method)
+	result = trPar.transformParallel(input, method, threads)
 	duration := time.Since(tBefore)
 	//Ausgabe der Zeit in Sekunden mit 3 Kommastellen
 	msec := int32(duration.Seconds() * 1000)
@@ -80,15 +80,15 @@ func transformPicture(input string) {
 	picture = readPicture(input)
 	//alle Algorithmen werden verwendet
 	analyzePictureSeq(input, "Schwellwert")
-	analyzePicturePar(input, "Schwellwert")
+	analyzePicturePar(input, "Schwellwert", 1)
 	analyzePictureSeq(input, "FloydSteinberg")
-	analyzePicturePar(input, "FloydSteinberg")
+	analyzePicturePar(input, "FloydSteinberg", 1)
 	analyzePictureSeq(input, "Algorithm2")
-	analyzePicturePar(input, "Algorithm2")
+	analyzePicturePar(input, "Algorithm2", 1)
 	analyzePictureSeq(input, "Algorithm3")
-	analyzePicturePar(input, "Algorithm3")
+	analyzePicturePar(input, "Algorithm3", 1)
 	analyzePictureSeq(input, "Graustufen")
-	analyzePicturePar(input, "Graustufen")
+	analyzePicturePar(input, "Graustufen", 1)
 	fmt.Println("")
 }
 

@@ -34,7 +34,7 @@ func (t transformSeq) transformSequentiell(input, method string) bool {
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		switch method {
 		case "Schwellwert":
-			m = t.transformLineSchwellwert(m, y, bounds, differenceOfPixel)
+			m = t.transformLineSchwellwert(m, y, bounds)
 		case "FloydSteinberg":
 			m = t.transformLineFloydSteinberg(m, y, bounds, differenceOfPixel)
 		case "Algorithm2":
@@ -42,27 +42,23 @@ func (t transformSeq) transformSequentiell(input, method string) bool {
 		case "Algorithm3":
 			m = t.transformLineAlgorithm3(m, y, bounds, differenceOfPixel)
 		case "Graustufen":
-			m = t.transformLineGraustufen(m, y, bounds, differenceOfPixel)
+			m = t.transformLineGraustufen(m, y, bounds)
 		}
 	}
 	if format == ".png" {
 		png.Encode(newPic, m)
-	} else {
+	} else if format == ".jpg" {
 		jpeg.Encode(newPic, m, nil)
 	}
 	return true
 }
 
 //Funktion, die jeweils eine Zeile mit Schwellwert transformiert
-func (t transformSeq) transformLineSchwellwert(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
+func (t transformSeq) transformLineSchwellwert(m *image.RGBA, y int, bounds image.Rectangle) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		r, g, b, _ := t.pic.At(x, y).RGBA()
-		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
-		r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
-		g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
-		b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
-		// Maximalwert: jeweils 256
-		value := (r + g + b) / 3
+		// durch 256 und durch 3 Werte
+		value := (r + g + b) / 768
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		if value >= 128 {
 			m.Set(x, y, color.RGBA{255, 255, 255, 255})
@@ -240,15 +236,11 @@ func (t transformSeq) transformLineAlgorithm3(m *image.RGBA, y int, bounds image
 }
 
 //Funktion, die jeweils eine Zeile mit Graustufen transformiert
-func (t transformSeq) transformLineGraustufen(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
+func (t transformSeq) transformLineGraustufen(m *image.RGBA, y int, bounds image.Rectangle) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		r, g, b, _ := t.pic.At(x, y).RGBA()
-		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
-		r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
-		g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
-		b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
-		// Maximalwert: jeweils 256
-		value := uint8((r + g + b) / 3)
+		// durch 256 und durch 3 Werte
+		value := uint8((r + g + b) / 768)
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		m.Set(x, y, color.RGBA{value, value, value, 255})
 	}
