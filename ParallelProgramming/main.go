@@ -20,7 +20,6 @@ func readPicture(input string) image.Image {
 		return nil
 	}
 	defer reader.Close()
-
 	pic, _, err := image.Decode(reader)
 	if err != nil {
 		//		return nil //--> Testabdeckung 100 %
@@ -29,9 +28,8 @@ func readPicture(input string) image.Image {
 }
 
 //Funktion, ob addierte Pixelanzahl zwischen 0 und 255 liegt
-func checkValueOfPixel(value uint32, add float32) uint32 {
-	var result int32
-	result = int32(value) + int32(add)
+func checkValueOfPixel(value uint8, add float32) uint8 {
+	result := int32(value) + int32(add)
 	if result > 255 {
 		//falls addierte Pixelanzahl > 255: Setzen des Wertes auf 255
 		result = 255
@@ -39,7 +37,7 @@ func checkValueOfPixel(value uint32, add float32) uint32 {
 		//falls addierte Pixelanzahl < 0: Setzen des Wertes auf 0
 		result = 0
 	}
-	return uint32(result)
+	return uint8(result)
 }
 
 //Funktion, die Zeit zur Ausführung der sequentiellen Transformation misst
@@ -79,14 +77,14 @@ func transformPicture(input string) {
 	fmt.Println("Bild: ", input)
 	picture = readPicture(input)
 	//alle Algorithmen werden verwendet
-	analyzePictureSeq(input, "Schwellwert")
-	analyzePicturePar(input, "Schwellwert", 1)
 	analyzePictureSeq(input, "FloydSteinberg")
 	analyzePicturePar(input, "FloydSteinberg", 1)
 	analyzePictureSeq(input, "Algorithm2")
 	analyzePicturePar(input, "Algorithm2", 1)
 	analyzePictureSeq(input, "Algorithm3")
 	analyzePicturePar(input, "Algorithm3", 1)
+	analyzePictureSeq(input, "Schwellwert")
+	analyzePicturePar(input, "Schwellwert", 1)
 	analyzePictureSeq(input, "Graustufen")
 	analyzePicturePar(input, "Graustufen", 1)
 	fmt.Println("")
@@ -94,9 +92,10 @@ func transformPicture(input string) {
 
 func main() {
 	//alle Bilder werden transformiert
+	transformPicture("eric.jpg")
 	transformPicture("bunte_smarties.png")
 	transformPicture("dhbw.jpg")
-	transformPicture("middleage.png")
 	transformPicture("schwarz_weiss.png")
 	transformPicture("schwarz_weiss.jpg")
+	transformPicture("sonnenuntergang.jpg")
 }

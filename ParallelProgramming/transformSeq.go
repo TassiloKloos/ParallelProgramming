@@ -56,14 +56,12 @@ func (t transformSeq) transformSequentiell(input, method string) bool {
 //Funktion, die jeweils eine Zeile mit Schwellwert transformiert
 func (t transformSeq) transformLineSchwellwert(m *image.RGBA, y int, bounds image.Rectangle) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		r, g, b, _ := t.pic.At(x, y).RGBA()
-		// durch 256 und durch 3 Werte
-		value := (r + g + b) / 768
+		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		if value >= 128 {
-			m.Set(x, y, color.RGBA{255, 255, 255, 255})
+			m.Set(x, y, color.White)
 		} else {
-			m.Set(x, y, color.RGBA{0, 0, 0, 255}) //wird in Test transformSeq_test nicht durchlaufen
+			m.Set(x, y, color.Black) //wird in Testfall transformSeq_test nicht durchlaufen
 		}
 	}
 	return m
@@ -73,20 +71,16 @@ func (t transformSeq) transformLineSchwellwert(m *image.RGBA, y int, bounds imag
 func (t transformSeq) transformLineFloydSteinberg(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
-		r, g, b, _ := t.pic.At(x, y).RGBA()
+		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
-		r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
-		g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
-		b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
-		// Maximalwert: jeweils 256
-		value := (r + g + b) / 3
+		value = checkValueOfPixel(value, differenceOfPixel[y][x])
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		if value >= 128 {
-			m.Set(x, y, color.RGBA{255, 255, 255, 255})
+			m.Set(x, y, color.White)
 			//verbleibende negative Differenz wird berechnet
 			difference = float32(-(255 - float32(value)))
 		} else {
-			m.Set(x, y, color.RGBA{0, 0, 0, 255})
+			m.Set(x, y, color.Black)
 			//verbleibende positive Differenz wird berechnet
 			difference = float32(value)
 		}
@@ -115,20 +109,16 @@ func (t transformSeq) transformLineFloydSteinberg(m *image.RGBA, y int, bounds i
 func (t transformSeq) transformLineAlgorithm2(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
-		r, g, b, _ := t.pic.At(x, y).RGBA()
+		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
-		r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
-		g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
-		b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
-		// Maximalwert: jeweils 256
-		value := (r + g + b) / 3
+		value = checkValueOfPixel(value, differenceOfPixel[y][x])
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		if value >= 128 {
-			m.Set(x, y, color.RGBA{255, 255, 255, 255})
+			m.Set(x, y, color.White)
 			//verbleibende negative Differenz wird berechnet
 			difference = float32(-(255 - float32(value)))
 		} else {
-			m.Set(x, y, color.RGBA{0, 0, 0, 255})
+			m.Set(x, y, color.Black)
 			//verbleibende positive Differenz wird berechnet
 			difference = float32(value)
 		}
@@ -165,20 +155,16 @@ func (t transformSeq) transformLineAlgorithm2(m *image.RGBA, y int, bounds image
 func (t transformSeq) transformLineAlgorithm3(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
-		r, g, b, _ := t.pic.At(x, y).RGBA()
+		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
-		r = checkValueOfPixel(r/256, differenceOfPixel[y][x])
-		g = checkValueOfPixel(g/256, differenceOfPixel[y][x])
-		b = checkValueOfPixel(b/256, differenceOfPixel[y][x])
-		// Maximalwert: jeweils 256
-		value := (r + g + b) / 3
+		value = checkValueOfPixel(value, differenceOfPixel[y][x])
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		if value >= 128 {
-			m.Set(x, y, color.RGBA{255, 255, 255, 255})
+			m.Set(x, y, color.White)
 			//verbleibende negative Differenz wird berechnet
 			difference = float32(-(255 - float32(value)))
 		} else {
-			m.Set(x, y, color.RGBA{0, 0, 0, 255})
+			m.Set(x, y, color.Black)
 			//verbleibende positive Differenz wird berechnet
 			difference = float32(value)
 		}
@@ -238,9 +224,7 @@ func (t transformSeq) transformLineAlgorithm3(m *image.RGBA, y int, bounds image
 //Funktion, die jeweils eine Zeile mit Graustufen transformiert
 func (t transformSeq) transformLineGraustufen(m *image.RGBA, y int, bounds image.Rectangle) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		r, g, b, _ := t.pic.At(x, y).RGBA()
-		// durch 256 und durch 3 Werte
-		value := uint8((r + g + b) / 768)
+		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		m.Set(x, y, color.RGBA{value, value, value, 255})
 	}
