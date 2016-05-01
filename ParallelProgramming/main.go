@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -57,18 +58,18 @@ func analyzePictureSeq(input, method string) bool {
 }
 
 //Funktion, die Zeit zur Ausführung der parallelen Transformation misst
-func analyzePicturePar(input, method string, threads int) bool {
+func analyzePicturePar(input, method string) bool {
 	tBefore := time.Now()
 	result := false
 	//neues Objekt zur parallelen Transformation
 	trPar := transformPar{picture}
 	//Aufruf der Transformations-Methode
-	result = trPar.transformParallel(input, method, threads)
+	result = trPar.transformParallel(input, method)
 	duration := time.Since(tBefore)
 	//Ausgabe der Zeit in Sekunden mit 3 Kommastellen
 	msec := int32(duration.Seconds() * 1000)
 	sec := float32(msec) / 1000
-	fmt.Println("Dauer bei ", method, " parallel: ", sec, " sec")
+	fmt.Println("Dauer bei ", method, " parallel(", getGOMAXPROCS(), " Thread(s)): ", sec, " sec")
 	return result
 }
 
@@ -78,19 +79,31 @@ func transformPicture(input string) {
 	picture = readPicture(input)
 	//alle Algorithmen werden verwendet
 	analyzePictureSeq(input, "FloydSteinberg")
-	analyzePicturePar(input, "FloydSteinberg", 1)
+	analyzePicturePar(input, "FloydSteinberg")
 	analyzePictureSeq(input, "Algorithm2")
-	analyzePicturePar(input, "Algorithm2", 1)
+	analyzePicturePar(input, "Algorithm2")
 	analyzePictureSeq(input, "Algorithm3")
-	analyzePicturePar(input, "Algorithm3", 1)
+	analyzePicturePar(input, "Algorithm3")
 	analyzePictureSeq(input, "Schwellwert")
-	analyzePicturePar(input, "Schwellwert", 1)
+	analyzePicturePar(input, "Schwellwert")
 	analyzePictureSeq(input, "Graustufen")
-	analyzePicturePar(input, "Graustufen", 1)
+	analyzePicturePar(input, "Graustufen")
 	fmt.Println("")
 }
 
+//Auslesen der maximal benutzten Prozessoren
+func getGOMAXPROCS() int {
+	return runtime.GOMAXPROCS(0)
+}
+
+//Setzen der maximal benutzten Prozessoren
+func setGOMAXPROCS(threads int) {
+	runtime.GOMAXPROCS(threads)
+}
+
 func main() {
+	//Setzen der maximal benutzten Prozessoren auf 4
+	setGOMAXPROCS(4)
 	//alle Bilder werden transformiert
 	transformPicture("eric.jpg")
 	transformPicture("bunte_smarties.png")
@@ -98,4 +111,5 @@ func main() {
 	transformPicture("schwarz_weiss.png")
 	transformPicture("schwarz_weiss.jpg")
 	transformPicture("sonnenuntergang.jpg")
+
 }

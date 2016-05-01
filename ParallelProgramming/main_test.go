@@ -38,6 +38,13 @@ func TestTransformPicture(t *testing.T) {
 	//geeignete Prüfung einbauen
 }
 
+func TestGetterAndSetter(t *testing.T) {
+	setGOMAXPROCS(4)
+	if getGOMAXPROCS() != 4 {
+		t.Error("Fehler beim Setzen der maximal benötigten Prozesse")
+	}
+}
+
 func TestMain(t *testing.T) {
 	main()
 	//geeignete Prüfung einbauen
