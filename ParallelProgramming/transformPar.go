@@ -30,45 +30,51 @@ func (t transformPar) transformParallel(input, method string) bool {
 	m = image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// 2-dimensionales Array, welches Differenzen der umliegenden Pixel speichert
 	differenceOfPixel := make([][]float32, bounds.Max.Y)
-	differenceOfPixelc := make(chan [][]float32)
 	for element := range differenceOfPixel {
 		differenceOfPixel[element] = make([]float32, bounds.Max.X)
 	}
-
-	//Versuch des Erzeugen eines Channels für das zweidimensionale Array
+	//Channel, um Bearbeitungsreihenfolge der Threads einzuhalten
+	order := make(chan int)
 	go func() {
-		differenceOfPixelc <- differenceOfPixel
+		order <- 0
 	}()
-	//	fmt.Println(<-differenceOfPixelc)
-
 	//zwei for-Schleifen, um jeden Pixelwert auszulesen
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		//hier Go-Routinen starten, für jede Zeile eigene Go-Routine
-		//Probleme, da Go-Routinen andere Ausführung der Pixelzeilen wählt
+		//Probleme, da Go-Routinen andere Ausführung der Pixelzeilen wählt <-- behoben
 		//wenn auf differenceOfPixel global zugegriffen werden soll, kommt es zu Problemen zwischen den Go-Routinen
-		switch method {
-		case "Schwellwert":
-			go t.transformLineSchwellwert(y, bounds)
-		case "FloydSteinberg":
-			go t.transformLineFloydSteinberg(y, bounds, differenceOfPixel)
-		case "Algorithm2":
-			go t.transformLineAlgorithm2(y, bounds, differenceOfPixel)
-		case "Algorithm3":
-			go t.transformLineAlgorithm3(y, bounds, differenceOfPixel)
-		case "Graustufen":
-			go t.transformLineGraustufen(y, bounds)
+
+		next := <-order
+		//erst wenn ersten zwei Pixel bearbeitet wurden, darf nächste Zeile bearbeitet werden
+		if y == next {
+			switch method {
+			case "Schwellwert":
+				go t.transformLineSchwellwert(y, bounds, order)
+			case "FloydSteinberg":
+				go t.transformLineFloydSteinberg(y, bounds, differenceOfPixel, order)
+			case "Algorithm2":
+				go t.transformLineAlgorithm2(y, bounds, differenceOfPixel, order)
+			case "Algorithm3":
+				go t.transformLineAlgorithm3(y, bounds, differenceOfPixel, order)
+			case "Graustufen":
+				go t.transformLineGraustufen(y, bounds, order)
+			}
 		}
 	}
-	if format == ".png" {
-		png.Encode(newPic, m)
-	} else {
-		jpeg.Encode(newPic, m, nil)
+	finished := <-order
+	if finished == bounds.Max.Y {
+		//		fmt.Println("Umwandlung")
+		if format == ".png" {
+			png.Encode(newPic, m)
+		} else {
+			jpeg.Encode(newPic, m, nil)
+		}
 	}
 	return true
 }
 
 //Funktion, die jeweils eine Zeile mit Schwellwert transformiert
-func (t transformPar) transformLineSchwellwert(y int, bounds image.Rectangle) {
+func (t transformPar) transformLineSchwellwert(y int, bounds image.Rectangle, order chan<- int) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
@@ -77,11 +83,14 @@ func (t transformPar) transformLineSchwellwert(y int, bounds image.Rectangle) {
 		} else {
 			m.Set(x, y, color.Black)
 		}
+		if x == 3 {
+			order <- y + 1 //y wird erhöht, wenn drei Pixel der vorigen Zeile  durchlaufen wurden
+		}
 	}
 }
 
 //Funktion, die jeweils eine Zeile mit Floyd-Steinberg-Algorithmus transformiert
-func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, differenceOfPixel [][]float32) {
+func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, differenceOfPixel [][]float32, order chan<- int) {
 	//	fmt.Println("Zeile: ", y)
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
@@ -118,11 +127,17 @@ func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle,
 			// x, y+1 = 5/16
 			differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference*5/16
 		}
+		if x == 3 {
+			order <- y + 1 //y wird erhöht, wenn drei Pixel der vorigen Zeile  durchlaufen wurden
+		}
+		//teilweise Aussetzer trotz Bedingung x ==3
+		//teilweise schon Umwandlung in png / jpg, obwohl letzte Zeile noch nicht fertig berechnet
+		//		fmt.Print(x, " ")
 	}
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 2 transformiert
-func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, differenceOfPixel [][]float32) {
+func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, differenceOfPixel [][]float32, order chan<- int) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
@@ -163,11 +178,14 @@ func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, dif
 			// x, y+2 = 1/12
 			differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference/12
 		}
+		if x == 3 {
+			order <- y + 1 //y wird erhöht, wenn drei Pixel der vorigen Zeile  durchlaufen wurden
+		}
 	}
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 3 transformiert
-func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, differenceOfPixel [][]float32) {
+func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, differenceOfPixel [][]float32, order chan<- int) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
@@ -232,14 +250,20 @@ func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, dif
 			// x, y+2 = 4/42 = 2/21
 			differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference*2/21
 		}
+		if x == 3 {
+			order <- y + 1 //y wird erhöht, wenn drei Pixel der vorigen Zeile  durchlaufen wurden
+		}
 	}
 }
 
 //Funktion, die jeweils eine Zeile mit Graustufen transformiert
-func (t transformPar) transformLineGraustufen(y int, bounds image.Rectangle) {
+func (t transformPar) transformLineGraustufen(y int, bounds image.Rectangle, order chan<- int) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		m.Set(x, y, color.RGBA{value, value, value, 255})
+		if x == 3 {
+			order <- y + 1 //y wird erhöht, wenn drei Pixel der vorigen Zeile  durchlaufen wurden
+		}
 	}
 }
