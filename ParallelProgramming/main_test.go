@@ -38,6 +38,11 @@ func TestTransformPicture(t *testing.T) {
 	//geeignete Prüfung einbauen
 }
 
+func TestTransformProcessor(t *testing.T) {
+	transformProcessor("schwarz_weiss.png", "FloydSteinberg")
+	//geeignete Prüfung einbauen
+}
+
 func TestGetterAndSetter(t *testing.T) {
 	setGOMAXPROCS(4)
 	if getGOMAXPROCS() != 4 {

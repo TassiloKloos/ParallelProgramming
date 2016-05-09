@@ -65,6 +65,7 @@ func (t transformPar) transformParallel(input, method string) bool {
 	//falls alle Zeilen transformiert wurden
 	wg.Wait()
 	//close(order) 		<-- funktioniert nicht, anscheinend wird an dieser Stelle noch in den Channel geschrieben
+	//teilweise letzte Zeile nicht in Bild vorhanden --> letzte Zeile wird nicht bis zur letzten Spalte transformiert
 	if format == ".png" {
 		png.Encode(newPic, m)
 	} else {

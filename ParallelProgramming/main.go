@@ -28,6 +28,16 @@ func readPicture(input string) image.Image {
 	return pic
 }
 
+//Auslesen der maximal benutzten Prozessoren
+func getGOMAXPROCS() int {
+	return runtime.GOMAXPROCS(0)
+}
+
+//Setzen der maximal benutzten Prozessoren
+func setGOMAXPROCS(threads int) {
+	runtime.GOMAXPROCS(threads)
+}
+
 //Funktion, ob addierte Pixelanzahl zwischen 0 und 255 liegt
 func checkValueOfPixel(value uint8, add float32) uint8 {
 	result := int32(value) + int32(add)
@@ -73,42 +83,38 @@ func analyzePicturePar(input, method string) bool {
 	return result
 }
 
+func transformProcessor(input, method string) {
+	//1-4 Prozessoren werden verwendet
+	analyzePictureSeq(input, method)
+	setGOMAXPROCS(1)
+	analyzePicturePar(input, method)
+	setGOMAXPROCS(2)
+	analyzePicturePar(input, method)
+	setGOMAXPROCS(3)
+	analyzePicturePar(input, method)
+	setGOMAXPROCS(4)
+	analyzePicturePar(input, method)
+}
+
 //Funktion, die ausgewähltes Bild in allen Methoden neu berechnet
 func transformPicture(input string) {
 	fmt.Println("Bild: ", input)
 	picture = readPicture(input)
 	//alle Algorithmen werden verwendet
-	analyzePictureSeq(input, "FloydSteinberg")
-	analyzePicturePar(input, "FloydSteinberg")
-	analyzePictureSeq(input, "Algorithm2")
-	analyzePicturePar(input, "Algorithm2")
-	analyzePictureSeq(input, "Algorithm3")
-	analyzePicturePar(input, "Algorithm3")
-	analyzePictureSeq(input, "Schwellwert")
-	analyzePicturePar(input, "Schwellwert")
-	analyzePictureSeq(input, "Graustufen")
-	analyzePicturePar(input, "Graustufen")
+	transformProcessor(input, "FloydSteinberg")
+	transformProcessor(input, "Algorithm2")
+	transformProcessor(input, "Algorithm3")
+	transformProcessor(input, "Schwellwert")
+	transformProcessor(input, "Graustufen")
 	fmt.Println("")
 }
 
-//Auslesen der maximal benutzten Prozessoren
-func getGOMAXPROCS() int {
-	return runtime.GOMAXPROCS(0)
-}
-
-//Setzen der maximal benutzten Prozessoren
-func setGOMAXPROCS(threads int) {
-	runtime.GOMAXPROCS(threads)
-}
-
 func main() {
-	//Setzen der maximal benutzten Prozessoren auf 4
-	setGOMAXPROCS(4)
 	//alle Bilder werden transformiert
 	transformPicture("eric.jpg")
-	transformPicture("bunte_smarties.png")
-	transformPicture("dhbw.jpg")
-	transformPicture("schwarz_weiss.png")
-	transformPicture("schwarz_weiss.jpg")
-	transformPicture("sonnenuntergang.jpg")
+	//	transformPicture("bunte_smarties.png")
+	//	transformPicture("dhbw.jpg")
+	//	transformPicture("schwarz_weiss.png")
+	//	transformPicture("schwarz_weiss.jpg")
+	//	transformPicture("sonnenuntergang.jpg")
 }
