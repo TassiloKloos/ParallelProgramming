@@ -33,14 +33,14 @@ func (t transformSeq) transformSequentiell(input, method string) bool {
 	//zwei for-Schleifen, um jeden Pixelwert auszulesen
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		switch method {
-		case "Schwellwert":
-			m = t.transformLineSchwellwert(m, y, bounds)
 		case "FloydSteinberg":
 			m = t.transformLineFloydSteinberg(m, y, bounds, differenceOfPixel)
 		case "Algorithm2":
 			m = t.transformLineAlgorithm2(m, y, bounds, differenceOfPixel)
 		case "Algorithm3":
 			m = t.transformLineAlgorithm3(m, y, bounds, differenceOfPixel)
+		case "Schwellwert":
+			m = t.transformLineSchwellwert(m, y, bounds)
 		case "Graustufen":
 			m = t.transformLineGraustufen(m, y, bounds)
 		}
@@ -51,20 +51,6 @@ func (t transformSeq) transformSequentiell(input, method string) bool {
 		jpeg.Encode(newPic, m, nil)
 	}
 	return true
-}
-
-//Funktion, die jeweils eine Zeile mit Schwellwert transformiert
-func (t transformSeq) transformLineSchwellwert(m *image.RGBA, y int, bounds image.Rectangle) *image.RGBA {
-	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
-		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
-		if value >= 128 {
-			m.Set(x, y, color.White)
-		} else {
-			m.Set(x, y, color.Black) //wird in Testfall transformSeq_test nicht durchlaufen
-		}
-	}
-	return m
 }
 
 //Funktion, die jeweils eine Zeile mit Floyd-Steinberg-Algorithmus transformiert
@@ -216,6 +202,20 @@ func (t transformSeq) transformLineAlgorithm3(m *image.RGBA, y int, bounds image
 			}
 			// x, y+2 = 4/42 = 2/21
 			differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference*2/21
+		}
+	}
+	return m
+}
+
+//Funktion, die jeweils eine Zeile mit Schwellwert transformiert
+func (t transformSeq) transformLineSchwellwert(m *image.RGBA, y int, bounds image.Rectangle) *image.RGBA {
+	for x := bounds.Min.X; x < bounds.Max.X; x++ {
+		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
+		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
+		if value >= 128 {
+			m.Set(x, y, color.White)
+		} else {
+			m.Set(x, y, color.Black) //wird in Testfall transformSeq_test nicht durchlaufen
 		}
 	}
 	return m

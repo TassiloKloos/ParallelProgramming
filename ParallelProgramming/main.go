@@ -111,5 +111,4 @@ func main() {
 	transformPicture("schwarz_weiss.png")
 	transformPicture("schwarz_weiss.jpg")
 	transformPicture("sonnenuntergang.jpg")
-
 }
