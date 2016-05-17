@@ -83,6 +83,7 @@ func analyzePicturePar(input, method string) bool {
 	return result
 }
 
+//Funktion, die ausgewähltes Bild sequentiell wie auch parallel neu berechnet
 func transformProcessor(input, method string) {
 	//1-4 Prozessoren werden verwendet
 	analyzePictureSeq(input, method)
@@ -111,10 +112,10 @@ func transformPicture(input string) {
 
 func main() {
 	//alle Bilder werden transformiert
+	transformPicture("dhbw.jpg")
 	transformPicture("eric.jpg")
-	//	transformPicture("bunte_smarties.png")
-	//	transformPicture("dhbw.jpg")
+	transformPicture("bunte_smarties.png")
 	//	transformPicture("schwarz_weiss.png")
 	//	transformPicture("schwarz_weiss.jpg")
-	//	transformPicture("sonnenuntergang.jpg")
+	transformPicture("sonnenuntergang.jpg")
 }

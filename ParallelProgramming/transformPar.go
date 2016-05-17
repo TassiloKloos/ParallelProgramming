@@ -13,6 +13,7 @@ import (
 //Definition der benötigten globalen Variablen
 var m *image.RGBA
 var wg sync.WaitGroup
+var differenceOfPixel [][]float32
 
 //Objekte dieser Klasse besitzen Bild als Variable
 type transformPar struct {
@@ -31,7 +32,7 @@ func (t transformPar) transformParallel(input, method string) bool {
 	defer newPic.Close()
 	m = image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// 2-dimensionales Array, welches Differenzen der umliegenden Pixel speichert
-	differenceOfPixel := make([][]float32, bounds.Max.Y)
+	differenceOfPixel = make([][]float32, bounds.Max.Y)
 	for element := range differenceOfPixel {
 		differenceOfPixel[element] = make([]float32, bounds.Max.X)
 	}
@@ -41,20 +42,19 @@ func (t transformPar) transformParallel(input, method string) bool {
 		order <- 0
 	}()
 	//WaitGroup wird auf Anzahl der Zeilen gesetzt, erst wenn alle Zeilen "Done" sind, endet Methode
-	wg.Add(bounds.Max.Y - 1)
+	wg.Add(bounds.Max.Y)
 	//zwei for-Schleifen, um jeden Pixelwert auszulesen
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		//für jede Zeile eigene Go-Routine
-		//richtiger globaler Zugriff auf differenceOfPixel?
 		//erst wenn ersten drei Pixel transformiert wurden, darf nächste Zeile transformiert werden
 		if y == <-order {
 			switch method {
 			case "FloydSteinberg":
-				go t.transformLineFloydSteinberg(y, bounds, differenceOfPixel, order)
+				go t.transformLineFloydSteinberg(y, bounds, order)
 			case "Algorithm2":
-				go t.transformLineAlgorithm2(y, bounds, differenceOfPixel, order)
+				go t.transformLineAlgorithm2(y, bounds, order)
 			case "Algorithm3":
-				go t.transformLineAlgorithm3(y, bounds, differenceOfPixel, order)
+				go t.transformLineAlgorithm3(y, bounds, order)
 			case "Schwellwert":
 				go t.transformLineSchwellwert(y, bounds, order)
 			case "Graustufen":
@@ -64,8 +64,9 @@ func (t transformPar) transformParallel(input, method string) bool {
 	}
 	//falls alle Zeilen transformiert wurden
 	wg.Wait()
-	//close(order) 		<-- funktioniert nicht, anscheinend wird an dieser Stelle noch in den Channel geschrieben
-	//teilweise letzte Zeile nicht in Bild vorhanden --> letzte Zeile wird nicht bis zur letzten Spalte transformiert
+
+	// close(order) //	<-- funktioniert nicht, anscheinend wird an dieser Stelle noch in den Channel geschrieben
+	// letzte Zeile nicht in Bild vorhanden --> letzte Zeile wird nicht bis zur letzten Spalte transformiert
 	if format == ".png" {
 		png.Encode(newPic, m)
 	} else {
@@ -75,7 +76,7 @@ func (t transformPar) transformParallel(input, method string) bool {
 }
 
 //Funktion, die jeweils eine Zeile mit Floyd-Steinberg-Algorithmus transformiert
-func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, differenceOfPixel [][]float32, order chan<- int) {
+func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, order chan<- int) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
@@ -108,7 +109,7 @@ func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle,
 			// x, y+1 = 5/16
 			differenceOfPixel[y+1][x] = differenceOfPixel[y+1][x] + difference*5/16
 		}
-		if x == 3 {
+		if x == 3 && y < bounds.Max.Y-1 {
 			order <- y + 1 //y wird erhöht, wenn drei Pixel der Zeile  durchlaufen wurden
 		}
 	}
@@ -116,7 +117,7 @@ func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle,
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 2 transformiert
-func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, differenceOfPixel [][]float32, order chan<- int) {
+func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, order chan<- int) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
@@ -157,7 +158,7 @@ func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, dif
 			// x, y+2 = 1/12
 			differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference/12
 		}
-		if x == 3 {
+		if x == 3 && y < bounds.Max.Y-1 {
 			order <- y + 1 //y wird erhöht, wenn drei Pixel der Zeile  durchlaufen wurden
 		}
 	}
@@ -165,7 +166,7 @@ func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, dif
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 3 transformiert
-func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, differenceOfPixel [][]float32, order chan<- int) {
+func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, order chan<- int) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		var difference float32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
@@ -230,7 +231,7 @@ func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, dif
 			// x, y+2 = 4/42 = 2/21
 			differenceOfPixel[y+2][x] = differenceOfPixel[y+2][x] + difference*2/21
 		}
-		if x == 3 {
+		if x == 3 && y < bounds.Max.Y-1 {
 			order <- y + 1 //y wird erhöht, wenn drei Pixel der  Zeile  durchlaufen wurden
 		}
 	}
@@ -247,8 +248,8 @@ func (t transformPar) transformLineSchwellwert(y int, bounds image.Rectangle, or
 		} else {
 			m.Set(x, y, color.Black)
 		}
-		if x == 3 {
-			order <- y + 1 //y wird erhöht, wenn drei Pixel der Zeile  durchlaufen wurden
+		if x == 0 && y < bounds.Max.Y-1 {
+			order <- y + 1 //y wird erhöht, wenn erster Pixel der Zeile  durchlaufen wurden
 		}
 	}
 	wg.Done()
@@ -260,8 +261,8 @@ func (t transformPar) transformLineGraustufen(y int, bounds image.Rectangle, ord
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		//Setzen eines neuen Farbwertes für Pixel, abhängig von derzeitigem Wert
 		m.Set(x, y, color.RGBA{value, value, value, 255})
-		if x == 3 {
-			order <- y + 1 //y wird erhöht, wenn drei Pixel der Zeile  durchlaufen wurden
+		if x == 0 && y < bounds.Max.Y-1 {
+			order <- y + 1 //y wird erhöht, wenn erster Pixel der Zeile  durchlaufen wurden
 		}
 	}
 	wg.Done()
