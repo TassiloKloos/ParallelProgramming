@@ -26,9 +26,9 @@ func (t transformSeq) transformSequentiell(input, method string) bool {
 	defer newPic.Close()
 	m := image.NewRGBA(image.Rectangle{Min: image.Point{0, 0}, Max: image.Point{bounds.Max.X, bounds.Max.Y}})
 	// 2-dimensionales Array, welches Differenzen der umliegenden Pixel speichert
-	differenceOfPixel := make([][]float32, bounds.Max.Y)
+	differenceOfPixel := make([][]int32, bounds.Max.Y)
 	for element := range differenceOfPixel {
-		differenceOfPixel[element] = make([]float32, bounds.Max.X)
+		differenceOfPixel[element] = make([]int32, bounds.Max.X)
 	}
 	//zwei for-Schleifen, um jeden Pixelwert auszulesen
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
@@ -54,9 +54,9 @@ func (t transformSeq) transformSequentiell(input, method string) bool {
 }
 
 //Funktion, die jeweils eine Zeile mit Floyd-Steinberg-Algorithmus transformiert
-func (t transformSeq) transformLineFloydSteinberg(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
+func (t transformSeq) transformLineFloydSteinberg(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]int32) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		var difference float32
+		var difference int32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
 		value = checkValueOfPixel(value, differenceOfPixel[y][x])
@@ -64,11 +64,11 @@ func (t transformSeq) transformLineFloydSteinberg(m *image.RGBA, y int, bounds i
 		if value >= 128 {
 			m.Set(x, y, color.White)
 			//verbleibende negative Differenz wird berechnet
-			difference = float32(-(255 - float32(value)))
+			difference = int32(-(255 - int32(value)))
 		} else {
 			m.Set(x, y, color.Black)
 			//verbleibende positive Differenz wird berechnet
-			difference = float32(value)
+			difference = int32(value)
 		}
 		//Aufteilung der Differenz nach Floyd-Steinberg auf umliegende Pixel
 		if x < bounds.Max.X-1 {
@@ -92,9 +92,9 @@ func (t transformSeq) transformLineFloydSteinberg(m *image.RGBA, y int, bounds i
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 2 transformiert
-func (t transformSeq) transformLineAlgorithm2(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
+func (t transformSeq) transformLineAlgorithm2(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]int32) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		var difference float32
+		var difference int32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
 		value = checkValueOfPixel(value, differenceOfPixel[y][x])
@@ -102,11 +102,11 @@ func (t transformSeq) transformLineAlgorithm2(m *image.RGBA, y int, bounds image
 		if value >= 128 {
 			m.Set(x, y, color.White)
 			//verbleibende negative Differenz wird berechnet
-			difference = float32(-(255 - float32(value)))
+			difference = int32(-(255 - int32(value)))
 		} else {
 			m.Set(x, y, color.Black)
 			//verbleibende positive Differenz wird berechnet
-			difference = float32(value)
+			difference = int32(value)
 		}
 		//Aufteilung der Differenz nach Algorithmus 2 auf umliegende Pixel
 		if x < bounds.Max.X-1 {
@@ -138,9 +138,9 @@ func (t transformSeq) transformLineAlgorithm2(m *image.RGBA, y int, bounds image
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 3 transformiert
-func (t transformSeq) transformLineAlgorithm3(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]float32) *image.RGBA {
+func (t transformSeq) transformLineAlgorithm3(m *image.RGBA, y int, bounds image.Rectangle, differenceOfPixel [][]int32) *image.RGBA {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		var difference float32
+		var difference int32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
 		// Einberechnug der bereits errechneten Differenzen von umliegenden Pixel
 		value = checkValueOfPixel(value, differenceOfPixel[y][x])
@@ -148,11 +148,11 @@ func (t transformSeq) transformLineAlgorithm3(m *image.RGBA, y int, bounds image
 		if value >= 128 {
 			m.Set(x, y, color.White)
 			//verbleibende negative Differenz wird berechnet
-			difference = float32(-(255 - float32(value)))
+			difference = int32(-(255 - int32(value)))
 		} else {
 			m.Set(x, y, color.Black)
 			//verbleibende positive Differenz wird berechnet
-			difference = float32(value)
+			difference = int32(value)
 		}
 		//Aufteilung der Differenz nach Algorithmus 3 auf umliegende Pixel
 		if x < bounds.Max.X-1 {

@@ -39,8 +39,8 @@ func setGOMAXPROCS(threads int) {
 }
 
 //Funktion, ob addierte Pixelanzahl zwischen 0 und 255 liegt
-func checkValueOfPixel(value uint8, add float32) uint8 {
-	result := int32(value) + int32(add)
+func checkValueOfPixel(value uint8, add int32) uint8 {
+	result := int32(value) + add
 	if result > 255 {
 		//falls addierte Pixelanzahl > 255: Setzen des Wertes auf 255
 		result = 255
@@ -112,10 +112,10 @@ func transformPicture(input string) {
 
 func main() {
 	//alle Bilder werden transformiert
-	transformPicture("dhbw.jpg")
-	transformPicture("eric.jpg")
 	transformPicture("bunte_smarties.png")
-	//	transformPicture("schwarz_weiss.png")
-	//	transformPicture("schwarz_weiss.jpg")
-	transformPicture("sonnenuntergang.jpg")
+	transformPicture("eric.jpg")
+	transformPicture("schwarz_weiss.png")
+	transformPicture("schwarz_weiss.jpg")
+	//	transformPicture("dhbw.jpg")
+	//	transformPicture("sonnenuntergang.jpg")
 }
