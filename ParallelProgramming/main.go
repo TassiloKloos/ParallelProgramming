@@ -103,10 +103,10 @@ func transformPicture(input string) {
 	picture = readPicture(input)
 	//alle Algorithmen werden verwendet
 	transformProcessor(input, "FloydSteinberg")
-	transformProcessor(input, "Algorithm2")
-	transformProcessor(input, "Algorithm3")
-	transformProcessor(input, "Schwellwert")
-	transformProcessor(input, "Graustufen")
+	//	transformProcessor(input, "Algorithm2")
+	//	transformProcessor(input, "Algorithm3")
+	//		transformProcessor(input, "Schwellwert")
+	//		transformProcessor(input, "Graustufen")
 	fmt.Println("")
 }
 
@@ -114,8 +114,8 @@ func main() {
 	//alle Bilder werden transformiert
 	transformPicture("bunte_smarties.png")
 	transformPicture("eric.jpg")
-	transformPicture("schwarz_weiss.png")
-	transformPicture("schwarz_weiss.jpg")
-	//	transformPicture("dhbw.jpg")
-	//	transformPicture("sonnenuntergang.jpg")
+	//	transformPicture("schwarz_weiss.png")
+	//	transformPicture("schwarz_weiss.jpg")
+	transformPicture("dhbw.jpg")
+	transformPicture("sonnenuntergang.jpg")
 }

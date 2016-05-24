@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -83,12 +84,14 @@ func (t transformPar) transformParallel(input, method string) bool {
 
 //Funktion, die jeweils eine Zeile mit Floyd-Steinberg-Algorithmus transformiert
 func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, pCountThreads *int32) {
-	//Erhöhen des Counters nicht möglich!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//	atomic.AddInt32(pCountThreads, 1)
+	atomic.AddInt32(pCountThreads, 1)
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		//Synchronisation über WaitGroup barrier, wenn Thread 1 bei 10 px, Thread 2 bei 7 px, Thread 3 bei 4 px und Thread 4 bei 1 px ist [usw]
 		threadNr := int32(y + 1)
-		if x == int((*pCountThreads-threadNr)*3+1) { //<--- pCountThreads = 0 !!!!!!!!!!!!!!!!!!!
+		if x == int((*pCountThreads-threadNr)*3+1) {
+			if *pCountThreads != threadNr {
+				fmt.Println("Sync") //<-----------------wird kaum aufgerufen!!!!!!!!!!!!!!!!!!!!!
+			}
 			barrier.Done() //zeigt an, dass bis zu bestimmtem Pixel bearbeitet wurde
 			barrier.Wait() //wartet auf alle anderen Threads, dass diese bestimmte Pixelanzahl erreicht haben
 			barrier.Add(1) //nachdem erfolgreich gewartet wurde, starten alle Threads wieder und Barriere wird erneut gesetzt
@@ -134,12 +137,11 @@ func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle,
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 2 transformiert
 func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, pCountThreads *int32) {
-	//Erhöhen des Counters nicht möglich!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//	atomic.AddInt32(pCountThreads, 1)
+	atomic.AddInt32(pCountThreads, 1)
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		//Synchronisation über WaitGroup barrier, wenn Thread 1 bei 10 px, Thread 2 bei 7 px, Thread 3 bei 4 px und Thread 4 bei 1 px ist [usw]
 		threadNr := int32(y + 1)
-		if x == int((*pCountThreads-threadNr)*3+1) { //<--- pCountThreads = 0 !!!!!!!!!!!!!!!!!!!
+		if x == int((*pCountThreads-threadNr)*3+1) {
 			barrier.Done() //zeigt an, dass bis zu bestimmtem Pixel bearbeitet wurde
 			barrier.Wait() //wartet auf alle anderen Threads, dass diese bestimmte Pixelanzahl erreicht haben
 			barrier.Add(1) //nachdem erfolgreich gewartet wurde, starten alle Threads wieder und Barriere wird erneut gesetzt
@@ -193,12 +195,11 @@ func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, ord
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 3 transformiert
 func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, pCountThreads *int32) {
-	//Erhöhen des Counters nicht möglich!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	//	atomic.AddInt32(pCountThreads, 1)
+	atomic.AddInt32(pCountThreads, 1)
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		//Synchronisation über WaitGroup barrier, wenn Thread 1 bei 10 px, Thread 2 bei 7 px, Thread 3 bei 4 px und Thread 4 bei 1 px ist [usw]
 		threadNr := int32(y + 1)
-		if x == int((*pCountThreads-threadNr)*3+1) { //<--- pCountThreads = 0 !!!!!!!!!!!!!!!!!!!
+		if x == int((*pCountThreads-threadNr)*3+1) {
 			barrier.Done() //zeigt an, dass bis zu bestimmtem Pixel bearbeitet wurde
 			barrier.Wait() //wartet auf alle anderen Threads, dass diese bestimmte Pixelanzahl erreicht haben
 			barrier.Add(1) //nachdem erfolgreich gewartet wurde, starten alle Threads wieder und Barriere wird erneut gesetzt
