@@ -33,11 +33,6 @@ func TestCheckValueOfPixel0(t *testing.T) {
 	}
 }
 
-func TestTransformPicture(t *testing.T) {
-	transformPicture("schwarz_weiss.png")
-	//geeignete Prüfung einbauen
-}
-
 func TestTransformProcessor(t *testing.T) {
 	transformProcessor("schwarz_weiss.png", "FloydSteinberg")
 	//geeignete Prüfung einbauen
@@ -48,9 +43,4 @@ func TestGetterAndSetter(t *testing.T) {
 	if getGOMAXPROCS() != 4 {
 		t.Error("Fehler beim Setzen der maximal benötigten Prozesse")
 	}
-}
-
-func TestMain(t *testing.T) {
-	main()
-	//geeignete Prüfung einbauen
 }

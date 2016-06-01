@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"image"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -86,6 +88,7 @@ func analyzePicturePar(input, method string) bool {
 //Funktion, die ausgewähltes Bild sequentiell wie auch parallel neu berechnet
 func transformProcessor(input, method string) {
 	//1-4 Prozessoren werden verwendet
+	picture = readPicture(input)
 	analyzePictureSeq(input, method)
 	setGOMAXPROCS(1)
 	analyzePicturePar(input, method)
@@ -97,25 +100,48 @@ func transformProcessor(input, method string) {
 	analyzePicturePar(input, method)
 }
 
-//Funktion, die ausgewähltes Bild in allen Methoden neu berechnet
-func transformPicture(input string) {
-	fmt.Println("Bild: ", input)
-	picture = readPicture(input)
-	//alle Algorithmen werden verwendet
-	transformProcessor(input, "FloydSteinberg")
-	//	transformProcessor(input, "Algorithm2")
-	//	transformProcessor(input, "Algorithm3")
-	//		transformProcessor(input, "Schwellwert")
-	//		transformProcessor(input, "Graustufen")
-	fmt.Println("")
-}
-
 func main() {
-	//alle Bilder werden transformiert
-	transformPicture("bunte_smarties.png")
-	transformPicture("eric.jpg")
-	//	transformPicture("schwarz_weiss.png")
-	//	transformPicture("schwarz_weiss.jpg")
-	transformPicture("dhbw.jpg")
-	transformPicture("sonnenuntergang.jpg")
+	validInputName := false
+	var name string
+	for validInputName == false {
+		validInputName = true
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Bild: ")
+		name, _ = reader.ReadString('\n')
+		name = strings.Trim(name, "\r")
+		name = strings.Replace(name, "\r", "", -1)
+		name = strings.Replace(name, "\n", "", -1)
+		if _, err := os.Stat("pictures/" + name); os.IsNotExist(err) {
+			validInputName = false
+			fmt.Println("Falsche Eingabe!")
+		}
+	}
+	validInputMethod := false
+	var method string
+	for validInputMethod == false {
+		validInputMethod = true
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Methode: FloydSteinberg (1), Algorithmus 2 (2), Algorithmus 3 (3), Schwellwert (4), Graustufen (5): ")
+		inputMethod, _ := reader.ReadString('\n')
+		inputMethod = strings.Trim(inputMethod, "\r")
+		inputMethod = strings.Replace(inputMethod, "\r", "", -1)
+		inputMethod = strings.Replace(inputMethod, "\n", "", -1)
+		switch inputMethod {
+		case "1":
+			method = "FloydSteinberg"
+		case "2":
+			method = "Algorithm2"
+		case "3":
+			method = "Algorithm3"
+		case "4":
+			method = "Schwellwert"
+		case "5":
+			method = "Graustufen"
+		default:
+			validInputMethod = false
+			fmt.Println("Falsche Eingabe!")
+		}
+	}
+	transformProcessor(name, method)
+	//	transformProcessor("dhbw.jpg", "FloydSteinberg")//<-- zu Testzwecken, um Eingabe zu überspringen
 }
