@@ -16,11 +16,8 @@ import (
 //Definition der benötigten globalen Variablen
 var m *image.RGBA
 var wg sync.WaitGroup
-var countRoutines int32
-var runningRoutines int32
 var differenceOfPixel [][]int32
-var waitForRoutines int32
-var lineReady bool
+var routines []int32
 
 //Objekte dieser Klasse besitzen Bild als Variable
 type transformPar struct {
@@ -43,6 +40,8 @@ func (t transformPar) transformParallel(input, method string) bool {
 	for element := range differenceOfPixel {
 		differenceOfPixel[element] = make([]int32, bounds.Max.X)
 	}
+	//Array, das Stand der Bearbeitung jeder y-Reihe speichert
+	routines = make([]int32, bounds.Max.Y)
 	//Channel, um Bearbeitungsreihenfolge der Routinen einzuhalten
 	order := make(chan int)
 	go func() {
@@ -50,36 +49,22 @@ func (t transformPar) transformParallel(input, method string) bool {
 	}()
 	//WaitGroup wird auf Anzahl der Zeilen gesetzt, erst wenn alle Zeilen "Done" sind, endet Methode
 	wg.Add(bounds.Max.Y)
-	//Anzahl der laufenden Routinen wird gezählt
-	countRoutines = 0
-	runningRoutines = 0
-	waitForRoutines = 0
-	lineReady = false
 	//zwei for-Schleifen, um jeden Pixelwert auszulesen
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		//für jede Zeile eigene Go-Routine
 		//erst wenn ersten drei Pixel transformiert wurden, darf nächste Zeile transformiert werden
 		if y == <-order {
-			done := false
-			for done == false {
-				//es werden maximal 4 Routinen gestartet, ansonsten wird gewartet, implementiert über Schleife
-				if runningRoutines < 4 {
-					done = true
-					switch method {
-					case "FloydSteinberg":
-						go t.transformLineFloydSteinberg(y, bounds, order, &differenceOfPixel, &countRoutines, &runningRoutines, &waitForRoutines, &lineReady, &wg)
-					case "Algorithm2":
-						go t.transformLineAlgorithm2(y, bounds, order, &differenceOfPixel, &countRoutines, &wg)
-					case "Algorithm3":
-						go t.transformLineAlgorithm3(y, bounds, order, &differenceOfPixel, &countRoutines, &wg)
-					case "Schwellwert":
-						go t.transformLineSchwellwert(y, bounds, order)
-					case "Graustufen":
-						go t.transformLineGraustufen(y, bounds, order)
-					}
-				} else {
-					time.Sleep(time.Millisecond)
-				}
+			switch method {
+			case "FloydSteinberg":
+				go t.transformLineFloydSteinberg(y, bounds, order, &differenceOfPixel, &wg)
+			case "Algorithm2":
+				go t.transformLineAlgorithm2(y, bounds, order, &differenceOfPixel, &wg)
+			case "Algorithm3":
+				go t.transformLineAlgorithm3(y, bounds, order, &differenceOfPixel, &wg)
+			case "Schwellwert":
+				go t.transformLineSchwellwert(y, bounds, order)
+			case "Graustufen":
+				go t.transformLineGraustufen(y, bounds, order)
 			}
 		}
 	}
@@ -95,24 +80,14 @@ func (t transformPar) transformParallel(input, method string) bool {
 }
 
 //Funktion, die jeweils eine Zeile mit Floyd-Steinberg-Algorithmus transformiert
-func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, pCountRoutines *int32, pRunningRoutines *int32, pWaitForRoutines *int32, pLineReady *bool, wg *sync.WaitGroup) {
-	atomic.AddInt32(pWaitForRoutines, 1)
-	atomic.AddInt32(pCountRoutines, 1)
-	atomic.AddInt32(pRunningRoutines, 1)
-	routineNr := y + 1
+func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, wg *sync.WaitGroup) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		//Synchronisation, wenn Routine 1 bei Pixel 10, Routine 2 bei Pixel 7, Routine 3 bei Pixel 4 und Routine 4 bei Pixel 1 ist usw.
-		if x == (int(*pCountRoutines)-routineNr)*3+1 { //noch nicht ganz richtig implementiert!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			//nur wenn mehr als eine Go-Routine läuft
-			if *pRunningRoutines > 1 {
-				//Anzahl der zu wartenden Routinen um 1 reduzieren
-				atomic.AddInt32(pWaitForRoutines, -1)
-				//solange warten, bis alle Routinen um 1 reduziert haben, also bis alle am Checkpunkt sind
-				for *pWaitForRoutines > 0 && *pLineReady == false {
-					time.Sleep(time.Millisecond)
+		if y > 0 {
+			for routines[y-1] < routines[y]+3 {
+				time.Sleep(time.Nanosecond)
+				if routines[y-1] == int32(bounds.Max.X) {
+					break
 				}
-				*pLineReady = true //eventuell andere Lösung, wie Routinen die Schleife wieder verlassen!!!!!!!!!!!!!!!!!!!!
-				atomic.AddInt32(pWaitForRoutines, 1)
 			}
 		}
 		var difference int32
@@ -149,19 +124,21 @@ func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle,
 		if x == 3 && y < bounds.Max.Y-1 {
 			order <- y + 1 //y wird erhöht, wenn drei Pixel der Zeile  durchlaufen wurden
 		}
+		routines[y] = routines[y] + 1
 	}
-	atomic.AddInt32(pRunningRoutines, -1)
-	atomic.AddInt32(pWaitForRoutines, -1)
 	wg.Done()
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 2 transformiert
-func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, pCountRoutines *int32, wg *sync.WaitGroup) {
-	atomic.AddInt32(pCountRoutines, 1)
+func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, wg *sync.WaitGroup) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		//Synchronisation, wenn Routine 1 bei 10 px, Routine 2 bei 7 px, Routine 3 bei 4 px und Routine 4 bei 1 px ist [usw]
-		routineNr := int32(y + 1)
-		if x == int((*pCountRoutines-routineNr)*3+1) {
+		if y > 0 {
+			for routines[y-1] < routines[y]+3 {
+				time.Sleep(time.Nanosecond)
+				if routines[y-1] == int32(bounds.Max.X) {
+					break
+				}
+			}
 		}
 		var difference int32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
@@ -205,18 +182,21 @@ func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, ord
 		if x == 3 && y < bounds.Max.Y-1 {
 			order <- y + 1 //y wird erhöht, wenn drei Pixel der Zeile  durchlaufen wurden
 		}
+		routines[y] = routines[y] + 1
 	}
 	wg.Done()
 }
 
 //Funktion, die jeweils eine Zeile mit Algorithmus 3 transformiert
-func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, pCountRoutines *int32, wg *sync.WaitGroup) {
-	atomic.AddInt32(pCountRoutines, 1)
+func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, wg *sync.WaitGroup) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
-		//Synchronisation über WaitGroup barrier, wenn Routine 1 bei 10 px, Routine 2 bei 7 px, Routine 3 bei 4 px und Routine 4 bei 1 px ist [usw]
-		routineNr := int32(y + 1)
-		if x == int((*pCountRoutines-routineNr)*3+1) {
-
+		if y > 0 {
+			for routines[y-1] < routines[y]+3 {
+				time.Sleep(time.Nanosecond)
+				if routines[y-1] == int32(bounds.Max.X) {
+					break
+				}
+			}
 		}
 		var difference int32
 		value := color.GrayModel.Convert((t.pic).At(x, y)).(color.Gray).Y
@@ -284,6 +264,7 @@ func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, ord
 		if x == 3 && y < bounds.Max.Y-1 {
 			order <- y + 1 //y wird erhöht, wenn drei Pixel der  Zeile  durchlaufen wurden
 		}
+		routines[y] = routines[y] + 1
 	}
 	wg.Done()
 }
