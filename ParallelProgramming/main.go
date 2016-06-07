@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"image"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -99,47 +101,46 @@ func transformProcessor(input, method string) {
 }
 
 func main() {
-	//	validInputName := false
-	//	var name string
-	//	for validInputName == false {
-	//		validInputName = true
-	//		reader := bufio.NewReader(os.Stdin)
-	//		fmt.Print("Bild: ")
-	//		name, _ = reader.ReadString('\n')
-	//		name = strings.Trim(name, "\r")
-	//		name = strings.Replace(name, "\r", "", -1)
-	//		name = strings.Replace(name, "\n", "", -1)
-	//		if _, err := os.Stat("pictures/" + name); os.IsNotExist(err) {
-	//			validInputName = false
-	//			fmt.Println("Falsche Eingabe!")
-	//		}
-	//	}
-	//	validInputMethod := false
-	//	var method string
-	//	for validInputMethod == false {
-	//		validInputMethod = true
-	//		reader := bufio.NewReader(os.Stdin)
-	//		fmt.Print("Methode: FloydSteinberg (1), Algorithmus 2 (2), Algorithmus 3 (3), Schwellwert (4), Graustufen (5): ")
-	//		inputMethod, _ := reader.ReadString('\n')
-	//		inputMethod = strings.Trim(inputMethod, "\r")
-	//		inputMethod = strings.Replace(inputMethod, "\r", "", -1)
-	//		inputMethod = strings.Replace(inputMethod, "\n", "", -1)
-	//		switch inputMethod {
-	//		case "1":
-	//			method = "FloydSteinberg"
-	//		case "2":
-	//			method = "Algorithm2"
-	//		case "3":
-	//			method = "Algorithm3"
-	//		case "4":
-	//			method = "Schwellwert"
-	//		case "5":
-	//			method = "Graustufen"
-	//		default:
-	//			validInputMethod = false
-	//			fmt.Println("Falsche Eingabe!")
-	//		}
-	//	}
-	//	transformProcessor(name, method)
-	transformProcessor("dhbw.jpg", "FloydSteinberg") //<-- zu Testzwecken, um Eingabe zu überspringen
+	validInputName := false
+	var name string
+	for validInputName == false {
+		validInputName = true
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Bild: ")
+		name, _ = reader.ReadString('\n')
+		name = strings.Trim(name, "\r")
+		name = strings.Replace(name, "\r", "", -1)
+		name = strings.Replace(name, "\n", "", -1)
+		if _, err := os.Stat("pictures/" + name); os.IsNotExist(err) {
+			validInputName = false
+			fmt.Println("Falsche Eingabe!")
+		}
+	}
+	validInputMethod := false
+	var method string
+	for validInputMethod == false {
+		validInputMethod = true
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Methode: FloydSteinberg (1), Algorithmus 2 (2), Algorithmus 3 (3), Schwellwert (4), Graustufen (5): ")
+		inputMethod, _ := reader.ReadString('\n')
+		inputMethod = strings.Trim(inputMethod, "\r")
+		inputMethod = strings.Replace(inputMethod, "\r", "", -1)
+		inputMethod = strings.Replace(inputMethod, "\n", "", -1)
+		switch inputMethod {
+		case "1":
+			method = "FloydSteinberg"
+		case "2":
+			method = "Algorithm2"
+		case "3":
+			method = "Algorithm3"
+		case "4":
+			method = "Schwellwert"
+		case "5":
+			method = "Graustufen"
+		default:
+			validInputMethod = false
+			fmt.Println("Falsche Eingabe!")
+		}
+	}
+	transformProcessor(name, method)
 }
