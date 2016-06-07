@@ -6,11 +6,11 @@ import (
 	"image/jpeg"
 	"image/png"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 )
 
 //Definition der benötigten globalen Variablen
@@ -84,7 +84,7 @@ func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle,
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		if y > 0 {
 			for routines[y-1] < routines[y]+3 {
-				time.Sleep(time.Nanosecond)
+				runtime.Gosched()
 				if routines[y-1] == int32(bounds.Max.X) {
 					break
 				}
@@ -134,7 +134,7 @@ func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, ord
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		if y > 0 {
 			for routines[y-1] < routines[y]+3 {
-				time.Sleep(time.Nanosecond)
+				runtime.Gosched()
 				if routines[y-1] == int32(bounds.Max.X) {
 					break
 				}
@@ -192,7 +192,7 @@ func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, ord
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		if y > 0 {
 			for routines[y-1] < routines[y]+3 {
-				time.Sleep(time.Nanosecond)
+				runtime.Gosched()
 				if routines[y-1] == int32(bounds.Max.X) {
 					break
 				}

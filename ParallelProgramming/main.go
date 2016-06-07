@@ -25,7 +25,6 @@ func readPicture(input string) image.Image {
 	defer reader.Close()
 	pic, _, err := image.Decode(reader)
 	if err != nil {
-		//		return nil //--> Testabdeckung 100 %
 	}
 	return pic
 }
@@ -97,6 +96,14 @@ func transformProcessor(input, method string) {
 	setGOMAXPROCS(3)
 	analyzePicturePar(input, method)
 	setGOMAXPROCS(4)
+	analyzePicturePar(input, method)
+	setGOMAXPROCS(5)
+	analyzePicturePar(input, method)
+	setGOMAXPROCS(6)
+	analyzePicturePar(input, method)
+	setGOMAXPROCS(7)
+	analyzePicturePar(input, method)
+	setGOMAXPROCS(8)
 	analyzePicturePar(input, method)
 }
 
