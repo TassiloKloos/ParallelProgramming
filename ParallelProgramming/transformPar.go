@@ -1,5 +1,8 @@
 package main
 
+//Matrikelnummer Carsten Bieber: 4346441
+//Matrikelnummer Tassilo Kloos: 2257414
+
 import (
 	"image"
 	"image/color"
@@ -24,7 +27,7 @@ type transformPar struct {
 	pic image.Image
 }
 
-//Funktion, die Bild einliest
+//Funktion, die neue Datei erzeugt
 func (t transformPar) transformParallel(input, method string) bool {
 	bounds := t.pic.Bounds()
 	//Aufteilen des Inputs in Name und Dateiformat
@@ -83,6 +86,7 @@ func (t transformPar) transformParallel(input, method string) bool {
 func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, wg *sync.WaitGroup) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		if y > 0 {
+			//warten, solange in der Zeile vorher nicht mindestens drei Pixel mehr bearbeitet wurden
 			for routines[y-1] < routines[y]+3 {
 				runtime.Gosched()
 				if routines[y-1] == int32(bounds.Max.X) {
@@ -133,6 +137,7 @@ func (t transformPar) transformLineFloydSteinberg(y int, bounds image.Rectangle,
 func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, wg *sync.WaitGroup) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		if y > 0 {
+			//warten, solange in der Zeile vorher nicht mindestens drei Pixel mehr bearbeitet wurden
 			for routines[y-1] < routines[y]+3 {
 				runtime.Gosched()
 				if routines[y-1] == int32(bounds.Max.X) {
@@ -191,6 +196,7 @@ func (t transformPar) transformLineAlgorithm2(y int, bounds image.Rectangle, ord
 func (t transformPar) transformLineAlgorithm3(y int, bounds image.Rectangle, order chan<- int, pDifferenceOfPixel *[][]int32, wg *sync.WaitGroup) {
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		if y > 0 {
+			//warten, solange in der Zeile vorher nicht mindestens drei Pixel mehr bearbeitet wurden
 			for routines[y-1] < routines[y]+3 {
 				runtime.Gosched()
 				if routines[y-1] == int32(bounds.Max.X) {

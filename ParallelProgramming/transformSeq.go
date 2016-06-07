@@ -1,5 +1,8 @@
 package main
 
+//Matrikelnummer Carsten Bieber: 4346441
+//Matrikelnummer Tassilo Kloos: 2257414
+
 import (
 	"image"
 	"image/color"
@@ -14,7 +17,7 @@ type transformSeq struct {
 	pic image.Image
 }
 
-//Funktion, die Bild einliest
+//Funktion, die neue Datei erzeugt
 func (t transformSeq) transformSequentiell(input, method string) bool {
 	bounds := t.pic.Bounds()
 	//Aufteilen des Inputs in Name und Dateiformat
@@ -215,7 +218,7 @@ func (t transformSeq) transformLineSchwellwert(m *image.RGBA, y int, bounds imag
 		if value >= 128 {
 			m.Set(x, y, color.White)
 		} else {
-			m.Set(x, y, color.Black) //wird in Testfall transformSeq_test nicht durchlaufen
+			m.Set(x, y, color.Black)
 		}
 	}
 	return m

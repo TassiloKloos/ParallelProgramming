@@ -1,5 +1,8 @@
 package main
 
+//Matrikelnummer Carsten Bieber: 4346441
+//Matrikelnummer Tassilo Kloos: 2257414
+
 import (
 	"bufio"
 	"fmt"
@@ -86,7 +89,7 @@ func analyzePicturePar(input, method string) bool {
 
 //Funktion, die ausgewähltes Bild sequentiell wie auch parallel neu berechnet
 func transformProcessor(input, method string) {
-	//1-4 Prozessoren werden verwendet
+	//1-8 Prozessoren werden verwendet, falls weniger oder mehr vorhanden: auskommentieren, bzw. erweitern
 	picture = readPicture(input)
 	analyzePictureSeq(input, method)
 	setGOMAXPROCS(1)
@@ -107,9 +110,11 @@ func transformProcessor(input, method string) {
 	analyzePicturePar(input, method)
 }
 
+//Main-Methode, in welcher Benutzereingabe implementiert ist
 func main() {
 	validInputName := false
 	var name string
+	//solange kein valider Dateiname eingegeben wird
 	for validInputName == false {
 		validInputName = true
 		reader := bufio.NewReader(os.Stdin)
@@ -125,6 +130,7 @@ func main() {
 	}
 	validInputMethod := false
 	var method string
+	//solange keine valide Methode eingegeben wird
 	for validInputMethod == false {
 		validInputMethod = true
 		reader := bufio.NewReader(os.Stdin)
